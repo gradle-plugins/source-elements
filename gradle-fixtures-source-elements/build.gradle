@@ -1,0 +1,8 @@
+plugins {
+	id 'java-library'
+}
+
+description = 'Gradle fixtures'
+
+group = 'dev.gradleplugins'
+version = '1.0'
