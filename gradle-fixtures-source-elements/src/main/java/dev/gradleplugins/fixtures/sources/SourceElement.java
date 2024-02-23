@@ -16,6 +16,7 @@
 package dev.gradleplugins.fixtures.sources;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,20 +42,30 @@ public abstract class SourceElement extends Element {
     /**
      * Writes the source files of this element to the given project, using the Gradle convention for source layout.
      */
-    public void writeToProject(File projectDir) {
-        final File srcDir = new File(projectDir, "src/" + getSourceSetName());
-        for (SourceFile sourceFile : getFiles()) {
-            sourceFile.writeToDirectory(srcDir);
-        }
+	public void writeToProject(Path projectDir) {
+		final Path srcDir = projectDir.resolve("src/" + getSourceSetName());
+		for (SourceFile sourceFile : getFiles()) {
+			sourceFile.writeToDirectory(srcDir);
+		}
+	}
+
+	// Essentially deprecated
+    public final void writeToProject(File projectDir) {
+        writeToProject(projectDir.toPath());
     }
 
     /**
      * Writes the source files of this element to the given source directory.
      */
-    public void writeToSourceDir(File sourceDir) {
-        for (SourceFile sourceFile : getFiles()) {
-            sourceFile.writeToFile(new File(sourceDir, sourceFile.getName()));
-        }
+    public void writeToSourceDir(Path sourceDir) {
+		for (SourceFile sourceFile : getFiles()) {
+			sourceFile.writeToFile(sourceDir.resolve(sourceFile.getName()));
+		}
+	}
+
+	// Essentially deprecated
+    public final void writeToSourceDir(File sourceDir) {
+        writeToSourceDir(sourceDir.toPath());
     }
 
     public static SourceElement empty() {
@@ -84,7 +95,7 @@ public abstract class SourceElement extends Element {
             }
 
             @Override
-            public void writeToProject(File projectDir) {
+            public void writeToProject(Path projectDir) {
                 for (SourceElement element : elements) {
                     element.writeToProject(projectDir);
                 }

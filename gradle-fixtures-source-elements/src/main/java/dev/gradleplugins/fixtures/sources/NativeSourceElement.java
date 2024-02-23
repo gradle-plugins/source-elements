@@ -15,7 +15,7 @@
  */
 package dev.gradleplugins.fixtures.sources;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,7 +70,7 @@ public abstract class NativeSourceElement extends SourceElement {
             }
 
             @Override
-            public void writeToProject(File projectDir) {
+            public void writeToProject(Path projectDir) {
                 for (SourceElement element : elements) {
                     element.writeToProject(projectDir);
                 }

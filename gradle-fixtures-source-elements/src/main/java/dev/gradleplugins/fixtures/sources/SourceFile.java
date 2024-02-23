@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -61,23 +62,29 @@ public final class SourceFile {
         return content;
     }
 
+    public Path writeToDirectory(Path base) {
+		final Path file = base.resolve(String.join(File.separator, path, name));
+		writeToFile(file);
+		return file;
+	}
+
+	// Essentially deprecated
     public File writeToDirectory(File base) {
-        return writeToDirectory(base, name);
+        return writeToDirectory(base.toPath()).toFile();
     }
 
-    private File writeToDirectory(File base, String name) {
-        final File file = new File(base, String.join(File.separator, path, name));
-        writeToFile(file);
-        return file;
-    }
+    public void writeToFile(Path file) {
+		try {
+			Files.createDirectories(file.getParent());
+			Files.write(file, content.getBytes(Charset.defaultCharset()));
+		} catch (IOException ex) {
+			throw new UncheckedIOException(String.format("Unable to create source file at '%s'.", file), ex);
+		}
+	}
 
+	// Essentially deprecated
     public void writeToFile(File file) {
-        try {
-            file.getParentFile().mkdirs();
-            Files.write(file.toPath(), content.getBytes(Charset.defaultCharset()));
-        } catch (IOException ex) {
-            throw new UncheckedIOException(String.format("Unable to create source file at '%s'.", file.getAbsolutePath()), ex);
-        }
+		writeToFile(file.toPath());
     }
 
     public String withPath(String basePath) {
