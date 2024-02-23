@@ -15,8 +15,11 @@
  */
 package dev.gradleplugins.fixtures.sources;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Scanner;
 
 /**
  * A single source file.
@@ -37,4 +40,8 @@ public abstract class SourceFileElement extends SourceElement {
             }
         };
     }
+
+	public static String fromResource(String path) {
+		return new Scanner(Objects.requireNonNull(SourceFileElement.class.getClassLoader().getResourceAsStream("META-INF/templates/" + path), "path '" + path + "' not found"), StandardCharsets.UTF_8.name()).useDelimiter("\\A").next();
+	}
 }
