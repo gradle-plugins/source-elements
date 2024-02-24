@@ -32,7 +32,12 @@ public abstract class SourceFileElement extends SourceElement {
         return Collections.singletonList(getSourceFile());
     }
 
-    public static SourceFileElement ofFile(final SourceFile file) {
+	@Override
+	public <R> R accept(Visitor<R> visitor) {
+		return visitor.visit(this);
+	}
+
+	public static SourceFileElement ofFile(final SourceFile file) {
         return new SourceFileElement() {
             @Override
             public SourceFile getSourceFile() {

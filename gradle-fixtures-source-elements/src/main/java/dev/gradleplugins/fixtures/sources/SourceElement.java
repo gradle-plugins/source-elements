@@ -17,11 +17,13 @@ package dev.gradleplugins.fixtures.sources;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * An element containing zero or more source files.
@@ -50,7 +52,8 @@ public abstract class SourceElement extends Element {
 	}
 
 	// Essentially deprecated
-    public final void writeToProject(File projectDir) {
+	// Cannot be final because of toolbox
+    public /*final*/ void writeToProject(File projectDir) {
         writeToProject(projectDir.toPath());
     }
 
@@ -68,9 +71,48 @@ public abstract class SourceElement extends Element {
         writeToSourceDir(sourceDir.toPath());
     }
 
-    public static SourceElement empty() {
+	/**
+	 * Convert this element using the specified transform.
+	 * Ex: {@code element.as(lib())} to convert any native elements into a library.
+	 *
+	 * @param transformer  the transform to apply
+	 * @return a source element, never null
+	 */
+	public final SourceElement as(ConvertOperation transformer) {
+		return Objects.requireNonNull(transformer.apply(this));
+	}
+
+	public interface ConvertOperation extends UnaryOperator<SourceElement> {}
+
+	/**
+	 * Query a sub-element of this element using the specified transform.
+	 * Ex: {@code element.get(headers())} to query all native headers from any native elements.
+	 *
+	 * @param transformer  the transform to apply, must not be null
+	 * @return a source element, never null
+	 */
+	public final SourceElement get(QueryOperation transformer) {
+		return Objects.requireNonNull(transformer.apply(this));
+	}
+
+	public interface QueryOperation extends UnaryOperator<SourceElement> {}
+
+	public <R> R accept(Visitor<R> visitor) {
+		return visitor.visit(this);
+	}
+
+	public interface Visitor<R> {
+		R visit(SourceElement element);
+		R visit(SourceFileElement element);
+		R visit(NativeSourceElement element);
+		R visit(NativeLibraryElement element);
+		R visit(NativeSourceFileElement element);
+		R visit(SourceElements element);
+	}
+
+	public static SourceElement empty() {
         return new SourceElement() {
-            @Override
+			@Override
             public List<SourceFile> getFiles() {
                 return Collections.emptyList();
             }
@@ -79,27 +121,18 @@ public abstract class SourceElement extends Element {
 
     /**
      * Returns a source element that contains the union of the given elements.
+	 * Each element will be written individually.
      */
     public static SourceElement ofElements(final SourceElement... elements) {
         return ofElements(Arrays.asList(elements));
     }
     public static SourceElement ofElements(Iterable<SourceElement> elements) {
-        return new SourceElement() {
-            @Override
-            public List<SourceFile> getFiles() {
-                List<SourceFile> files = new ArrayList<SourceFile>();
-                for (SourceElement element : elements) {
-                    files.addAll(element.getFiles());
-                }
-                return files;
-            }
-
-            @Override
-            public void writeToProject(Path projectDir) {
-                for (SourceElement element : elements) {
-                    element.writeToProject(projectDir);
-                }
-            }
+        return new SourceElements() {
+			@Override
+			public List<SourceElement> getElements() {
+				return StreamSupport.stream(elements.spliterator(), false)
+					.collect(Collectors.toList());
+			}
         };
     }
 
@@ -108,7 +141,7 @@ public abstract class SourceElement extends Element {
      */
     public static SourceElement ofFiles(final SourceFile... files) {
         return new SourceElement() {
-            @Override
+			@Override
             public List<SourceFile> getFiles() {
                 return Arrays.asList(files);
             }
@@ -127,7 +160,7 @@ public abstract class SourceElement extends Element {
         };
     }
 
-    public List<String> getSourceFileNames() {
+    public final List<String> getSourceFileNames() {
         return getFiles().stream().map(SourceFile::getName).collect(Collectors.toList());
     }
 }
