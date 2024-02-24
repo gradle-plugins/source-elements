@@ -98,10 +98,6 @@ public final class SourceFile {
 		return Arrays.stream(tokens).map(String::trim).filter(line -> !line.isEmpty()).findFirst().map(it -> it + "...").orElse("");
 	}
 
-	public SourceKind getKind() {
-		return SourceKind.valueOf(name);
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
