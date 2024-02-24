@@ -148,6 +148,7 @@ public class NativeElements {
 
 		interface Visitor {
 			SourceElement visit(SourceElement element);
+
 			SourceElement visit(NativeSourceElement element);
 		}
 	}
@@ -192,9 +193,13 @@ public class NativeElements {
 
 		interface Visitor {
 			SourceElement visit(SourceElement element);
+
 			SourceElement visit(SourceFileElement element);
+
 			SourceElement visit(NativeSourceElement element);
+
 			SourceElement visit(NativeLibraryElement element);
+
 			SourceElement visit(NativeSourceFileElement element);
 		}
 	}

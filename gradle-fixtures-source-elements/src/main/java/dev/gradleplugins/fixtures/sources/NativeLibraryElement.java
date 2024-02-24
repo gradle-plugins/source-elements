@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.gradleplugins.fixtures.sources;
 
 import static dev.gradleplugins.fixtures.sources.NativeElements.lib;
 
 public abstract class NativeLibraryElement extends NativeSourceElement {
-    public abstract SourceElement getPublicHeaders();
+	public abstract SourceElement getPublicHeaders();
 
-    public SourceElement getPrivateHeaders() {
-        return empty();
-    }
+	public SourceElement getPrivateHeaders() {
+		return empty();
+	}
 
-    @Override
-    public SourceElement getHeaders() {
-        return ofElements(getPublicHeaders(), getPrivateHeaders());
-    }
+	@Override
+	public SourceElement getHeaders() {
+		return ofElements(getPublicHeaders(), getPrivateHeaders());
+	}
 
 	@Override
 	public <R> R accept(Visitor<R> visitor) {
@@ -35,9 +36,9 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 	}
 
 	/**
-     * Returns a copy of this library with the public headers the 'public' headers directory.
-     */
-    public SourceElement asLib() {
+	 * Returns a copy of this library with the public headers the 'public' headers directory.
+	 */
+	public SourceElement asLib() {
 		return as(lib());
-    }
+	}
 }

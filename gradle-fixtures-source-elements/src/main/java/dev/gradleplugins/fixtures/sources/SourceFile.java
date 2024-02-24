@@ -28,6 +28,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.gradleplugins.fixtures.sources;
 
 import java.io.File;
@@ -40,87 +41,88 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public final class SourceFile {
-    private final String path;
-    private final String name;
-    private final String content;
+	private final String path;
+	private final String name;
+	private final String content;
 
-    public SourceFile(String path, String name, String content) {
-        this.path = path;
-        this.name = name;
-        this.content = content;
-    }
+	public SourceFile(String path, String name, String content) {
+		this.path = path;
+		this.name = name;
+		this.content = content;
+	}
 
-    public String getPath() {
-        return path;
-    }
+	public String getPath() {
+		return path;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getContent() {
-        return content;
-    }
+	public String getContent() {
+		return content;
+	}
 
-    public Path writeToDirectory(Path base) {
+	public Path writeToDirectory(Path base) {
 		final Path file = base.resolve(String.join(File.separator, path, name));
 		writeToFile(file);
 		return file;
 	}
 
 	// Essentially deprecated
-    public File writeToDirectory(File base) {
-        return writeToDirectory(base.toPath()).toFile();
-    }
+	public File writeToDirectory(File base) {
+		return writeToDirectory(base.toPath()).toFile();
+	}
 
-    public void writeToFile(Path file) {
+	public void writeToFile(Path file) {
 		try {
 			Files.createDirectories(file.getParent());
 			Files.write(file, content.getBytes(Charset.defaultCharset()));
-		} catch (IOException ex) {
+		} catch (
+			IOException ex) {
 			throw new UncheckedIOException(String.format("Unable to create source file at '%s'.", file), ex);
 		}
 	}
 
 	// Essentially deprecated
-    public void writeToFile(File file) {
+	public void writeToFile(File file) {
 		writeToFile(file.toPath());
-    }
+	}
 
-    public String withPath(String basePath) {
-        return String.join("/", basePath, path, name);
-    }
+	public String withPath(String basePath) {
+		return String.join("/", basePath, path, name);
+	}
 
-    private static String firstContentLine(String content) {
-        String[] tokens = content.split("\n", -1);
-        return Arrays.stream(tokens).map(String::trim).filter(line -> !line.isEmpty()).findFirst().map(it -> it + "...").orElse("");
-    }
+	private static String firstContentLine(String content) {
+		String[] tokens = content.split("\n", -1);
+		return Arrays.stream(tokens).map(String::trim).filter(line -> !line.isEmpty()).findFirst().map(it -> it + "...").orElse("");
+	}
 
-    public SourceKind getKind() {
-        return SourceKind.valueOf(name);
-    }
+	public SourceKind getKind() {
+		return SourceKind.valueOf(name);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        SourceFile that = (SourceFile) o;
-        return Objects.equals(path, that.path) && Objects.equals(name, that.name) && Objects.equals(content, that.content);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		SourceFile that = (SourceFile) o;
+		return Objects.equals(path, that.path) && Objects.equals(name, that.name) && Objects.equals(content, that.content);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(path, name, content);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(path, name, content);
+	}
 
-    @Override
-    public String toString() {
-        return "SourceFile{" +
-                "path='" + path + '\'' +
-                ", name='" + name + '\'' +
-                ", content='" + firstContentLine(content) + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "SourceFile{" +
+			"path='" + path + '\'' +
+			", name='" + name + '\'' +
+			", content='" + firstContentLine(content) + '\'' +
+			'}';
+	}
 }

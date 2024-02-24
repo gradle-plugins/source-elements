@@ -32,7 +32,8 @@ public abstract class SourceElements extends SourceElement {
 		return files;
 	}
 
-	@Override // very important to avoid overriding the elements' sourceSetName
+	@Override
+	// very important to avoid overriding the elements' sourceSetName
 	public void writeToProject(Path projectDir) {
 		for (SourceElement element : getElements()) {
 			element.writeToProject(projectDir);

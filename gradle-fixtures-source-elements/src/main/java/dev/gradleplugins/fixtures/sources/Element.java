@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.gradleplugins.fixtures.sources;
 
 public abstract class Element {
-    protected static SourceFile sourceFile(String path, String name, String content) {
-        return new SourceFile(path, name, content);
-    }
+	protected static SourceFile sourceFile(String path, String name, String content) {
+		return new SourceFile(path, name, content);
+	}
 }

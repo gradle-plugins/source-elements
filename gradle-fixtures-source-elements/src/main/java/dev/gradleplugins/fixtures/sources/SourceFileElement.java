@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.gradleplugins.fixtures.sources;
 
 import java.nio.charset.StandardCharsets;
@@ -25,12 +26,12 @@ import java.util.Scanner;
  * A single source file.
  */
 public abstract class SourceFileElement extends SourceElement {
-    public abstract SourceFile getSourceFile();
+	public abstract SourceFile getSourceFile();
 
-    @Override
-    public List<SourceFile> getFiles() {
-        return Collections.singletonList(getSourceFile());
-    }
+	@Override
+	public List<SourceFile> getFiles() {
+		return Collections.singletonList(getSourceFile());
+	}
 
 	@Override
 	public <R> R accept(Visitor<R> visitor) {
@@ -38,13 +39,13 @@ public abstract class SourceFileElement extends SourceElement {
 	}
 
 	public static SourceFileElement ofFile(final SourceFile file) {
-        return new SourceFileElement() {
-            @Override
-            public SourceFile getSourceFile() {
-                return file;
-            }
-        };
-    }
+		return new SourceFileElement() {
+			@Override
+			public SourceFile getSourceFile() {
+				return file;
+			}
+		};
+	}
 
 	public static String fromResource(String path) {
 		return new Scanner(Objects.requireNonNull(SourceFileElement.class.getClassLoader().getResourceAsStream("META-INF/templates/" + path), "path '" + path + "' not found"), StandardCharsets.UTF_8.name()).useDelimiter("\\A").next();
