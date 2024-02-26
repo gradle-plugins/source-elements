@@ -1,5 +1,6 @@
 include 'gradle-fixtures-source-elements'
 include 'nokeetemplates-plugins'
+include 'source-elements-annotation-processor'
 
 gradle.allprojects {
 	pluginManager.withPlugin('java-base') {

@@ -23,6 +23,7 @@ import org.gradle.api.initialization.Settings;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
+import org.gradle.api.tasks.compile.JavaCompile;
 
 import javax.annotation.Nullable;
 
@@ -32,7 +33,12 @@ public class TemplatePlugin implements Plugin<Settings> {
 		settings.getGradle().rootProject(project -> {
 			project.getPluginManager().apply("java-base");
 			project.getExtensions().getByType(SourceSetContainer.class).create("templates", sourceSet -> {
+				project.getDependencies().add(sourceSet.getAnnotationProcessorConfigurationName(), "dev.gradleplugins:source-elements-annotation-processor:latest.release");
 				project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures-source-elements:latest.release");
+
+				project.getTasks().named(sourceSet.getCompileJavaTaskName(), JavaCompile.class, task -> {
+					task.getOptions().getCompilerArgs().add("-AbasePath=" + project.getProjectDir());
+				});
 
 				final TaskProvider<Jar> jarTask = project.getTasks().register(sourceSet.getJarTaskName(), Jar.class, task -> {
 					task.from(sourceSet.getOutput());
