@@ -16,6 +16,8 @@
 
 package dev.gradleplugins.fixtures.sources;
 
+import dev.gradleplugins.fixtures.sources.annotations.SourceFileLocation;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
@@ -49,5 +51,10 @@ public abstract class SourceFileElement extends SourceElement {
 
 	public static String fromResource(String path) {
 		return new Scanner(Objects.requireNonNull(SourceFileElement.class.getClassLoader().getResourceAsStream("META-INF/templates/" + path), "path '" + path + "' not found"), StandardCharsets.UTF_8.name()).useDelimiter("\\A").next();
+	}
+
+	public static String fromResource(Class<?> contentType) {
+		String[] tokens = contentType.getAnnotation(SourceFileLocation.class).file().split("/");
+		return fromResource(tokens[0] + "/" + tokens[tokens.length - 1]);
 	}
 }

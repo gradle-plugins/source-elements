@@ -23,19 +23,18 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -54,16 +53,13 @@ public class SourceFileProcessor extends AbstractProcessor {
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		for (TypeElement annotation : annotations) {
-			// Retrieve elements annotated with @SourceFileInfo
-			Set<? extends Element> annotatedElements = (Set<Element>) roundEnv.getElementsAnnotatedWith(annotation);
+			Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
 
 			Set<String> allResources = new LinkedHashSet<>();
 			for (Element element : annotatedElements) {
-				if (element instanceof ExecutableElement) {
+				if (element.getKind().equals(ElementKind.INTERFACE) || element.getKind().equals(ElementKind.CLASS)) {
 					SourceFileLocation info = element.getAnnotation(SourceFileLocation.class);
-//					allResources.add(info.file());
 					allResources.add(info.file());
-//					generateClass((ExecutableElement) element, info);
 				}
 			}
 			allResources.forEach(it -> copySourceToResource(it));
