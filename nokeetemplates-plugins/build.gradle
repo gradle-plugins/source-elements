@@ -1,5 +1,5 @@
 plugins {
-	id 'java-gradle-plugin'
+	id 'dev.gradleplugins.java-gradle-plugin'
 }
 
 gradlePlugin {
@@ -7,6 +7,10 @@ gradlePlugin {
 		template {
 			id = 'nokeetemplates.source-element'
 			implementationClass = 'nokeebuild.TemplatePlugin'
+		}
+		templatesPlugin {
+			id = 'nokeedocs.sample-templates'
+			implementationClass = 'nokeedocs.templates.SampleTemplatesPlugin'
 		}
 	}
 }
