@@ -1,12 +1,26 @@
+plugins {
+	id 'dev.gradleplugins.gradle-plugin-development' version '1.6.8'
+}
+
 include 'gradle-fixtures-source-elements'
 include 'nokeetemplates-plugins'
 include 'source-elements-annotation-processor'
+include 'templates'
 
 gradle.allprojects {
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+	}
+
 	pluginManager.withPlugin('java-base') {
 		java {
 			sourceCompatibility = JavaVersion.VERSION_1_8
 			targetCompatibility = JavaVersion.VERSION_1_8
 		}
 	}
+}
+
+gradle.rootProject {
+	tasks.register('check') { dependsOn(subprojects.collect { "${it.name}:check" }) }
 }
