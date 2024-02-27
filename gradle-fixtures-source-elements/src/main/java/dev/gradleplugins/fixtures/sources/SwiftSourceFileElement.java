@@ -36,4 +36,18 @@ public abstract class SwiftSourceFileElement extends SourceFileElement {
 			}
 		};
 	}
+
+	public static SwiftSourceFileElement forFile(SourceFileElement file) {
+		return new SwiftSourceFileElement() {
+			@Override
+			public SourceFile getSourceFile() {
+				return file.getSourceFile();
+			}
+
+			@Override
+			public String getSourceSetName() {
+				return file.getSourceSetName();
+			}
+		};
+	}
 }
