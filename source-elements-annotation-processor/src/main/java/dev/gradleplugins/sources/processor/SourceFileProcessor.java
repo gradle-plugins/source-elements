@@ -33,10 +33,16 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -85,27 +91,71 @@ public class SourceFileProcessor extends AbstractProcessor {
 		String[] tokens = path.split("/");
 		Path sourcePath = Paths.get(basePath, path);
 		processingEnv.getMessager().printMessage(Diagnostic.Kind.MANDATORY_WARNING, "PROCESSING '" + sourcePath + "'");
+
+		if (Files.isDirectory(sourcePath)) {
+			copyDirToResource(Paths.get(basePath), sourcePath, info.excludes());
+		} else {
+			try {
+				String content = new String(Files.readAllBytes(sourcePath));
+				for (SourceFileProperty property : info.properties()) {
+					int i = 0;
+					Matcher p = Pattern.compile(property.regex(), Pattern.MULTILINE | Pattern.DOTALL).matcher(content);
+					while (p.find()) {
+						i++;
+					}
+
+					// Ensure property has at least one match
+					if (i == 0) {
+						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Property '" + property.name() + "' for '" + info.file() + "' not found");
+					}
+				}
+
+				FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/templates/" + tokens[0] + "/" + tokens[tokens.length - 1]);
+				try (OutputStream os = resource.openOutputStream()) {
+					Files.copy(sourcePath, os);
+				}
+			} catch (
+				IOException ex) {
+				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to copy file: " + ex.getMessage());
+			}
+		}
+	}
+
+	private void copyDirToResource(Path basePath, Path sourcePath, String[] excludes) {
 		try {
-			String content = new String(Files.readAllBytes(sourcePath));
-			for (SourceFileProperty property : info.properties()) {
-				int i = 0;
-				Matcher p = Pattern.compile(property.regex(), Pattern.MULTILINE | Pattern.DOTALL).matcher(content);
-				while (p.find()) {
-					i++;
-				}
+			List<Pattern> excludePatterns = Arrays.stream(excludes).map(it -> it.replace(".", "\\.").replace("**", "{{dir}}").replace("*", "{{all}}").replace("{{dir}}", ".*").replace("{{all}}", "[^/]*")).map(it -> Pattern.compile(it, Pattern.DOTALL)).collect(Collectors.toList());
+			excludePatterns.add(Pattern.compile(".*/\\.DS_Store", Pattern.DOTALL));
 
-				// Ensure property has at least one match
-				if (i == 0) {
-					processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Property '" + property.name() + "' for '" + info.file() + "' not found");
-				}
+			Path p = basePath.relativize(sourcePath);
+			String n = p.getName(0) + "/" + sourcePath.getFileName();
+			if (p.getNameCount() == 1) {
+				n = sourcePath.getFileName().toString();
 			}
+			final String namespace = n;
 
-			FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/templates/" + tokens[0] + "/" + tokens[tokens.length - 1]);
+			List<String> paths = new ArrayList<>();
+			Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					String relativePath = sourcePath.relativize(file).toString();
+					if (excludePatterns.stream().noneMatch(it -> it.matcher("/" + relativePath).find())) {
+						FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/templates/" + namespace + "/" + relativePath);
+						try (OutputStream os = resource.openOutputStream()) {
+							Files.copy(file, os);
+						}
+
+						paths.add(namespace + "/" + relativePath);
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
+
+			FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/templates/" + namespace + ".sample");
 			try (OutputStream os = resource.openOutputStream()) {
-				Files.copy(sourcePath, os);
+				os.write(paths.stream().collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8));
 			}
-		} catch (IOException ex) {
-			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to copy file: " + ex.getMessage());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

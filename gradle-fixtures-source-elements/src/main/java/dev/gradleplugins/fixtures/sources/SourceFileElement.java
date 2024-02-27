@@ -55,7 +55,7 @@ public abstract class SourceFileElement extends SourceElement {
 		};
 	}
 
-	private static String fromResource(String path) {
+	public static String fromResource(String path) {
 		return new Scanner(Objects.requireNonNull(SourceFileElement.class.getClassLoader().getResourceAsStream("META-INF/templates/" + path), "path '" + path + "' not found"), StandardCharsets.UTF_8.name()).useDelimiter("\\A").next();
 	}
 

@@ -26,4 +26,5 @@ import java.lang.annotation.Target;
 public @interface SourceFileLocation {
 	String file();
 	SourceFileProperty[] properties() default {};
+	String[] excludes() default {};
 }
