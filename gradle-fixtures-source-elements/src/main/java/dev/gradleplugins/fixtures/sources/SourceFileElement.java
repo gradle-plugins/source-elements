@@ -17,12 +17,18 @@
 package dev.gradleplugins.fixtures.sources;
 
 import dev.gradleplugins.fixtures.sources.annotations.SourceFileLocation;
+import dev.gradleplugins.fixtures.sources.annotations.SourceFileProperty;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A single source file.
@@ -56,5 +62,24 @@ public abstract class SourceFileElement extends SourceElement {
 	public static String fromResource(Class<?> contentType) {
 		String[] tokens = contentType.getAnnotation(SourceFileLocation.class).file().split("/");
 		return fromResource(tokens[0] + "/" + tokens[tokens.length - 1]);
+	}
+
+	public static String fromResource(Class<?> contentType, Consumer<? super Map<String, String>> action) {
+		Map<String, String> props = new LinkedHashMap<>();
+		action.accept(props);
+
+		String content = fromResource(contentType);
+		for (SourceFileProperty property : contentType.getAnnotation(SourceFileLocation.class).properties()) {
+			Matcher m = Pattern.compile(property.regex(), Pattern.MULTILINE | Pattern.DOTALL).matcher(content);
+			StringBuffer builder = new StringBuffer();
+			while (m.find()) {
+				m.appendReplacement(builder, m.group(0).replace(m.group(1), props.getOrDefault(property.name(), m.group(1))));
+			}
+			m.appendTail(builder);
+
+			content = builder.toString();
+		}
+
+		return content;
 	}
 }

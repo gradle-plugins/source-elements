@@ -16,14 +16,10 @@
 
 package dev.gradleplugins.fixtures.sources.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.Repeatable;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface SourceFileLocation {
-	String file();
-	SourceFileProperty[] properties() default {};
+@Repeatable(SourceFileProperties.class)
+public @interface SourceFileProperty {
+	String regex();
+	String name();
 }

@@ -17,6 +17,7 @@
 package dev.gradleplugins.sources.processor;
 
 import dev.gradleplugins.fixtures.sources.annotations.SourceFileLocation;
+import dev.gradleplugins.fixtures.sources.annotations.SourceFileProperty;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;
@@ -24,19 +25,26 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
+import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SourceFileProcessor extends AbstractProcessor {
 
@@ -55,11 +63,14 @@ public class SourceFileProcessor extends AbstractProcessor {
 		for (TypeElement annotation : annotations) {
 			Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
 
-			Set<String> allResources = new LinkedHashSet<>();
+			Set<SourceFileLocation> allResources = new LinkedHashSet<>();
 			for (Element element : annotatedElements) {
 				if (element.getKind().equals(ElementKind.INTERFACE) || element.getKind().equals(ElementKind.CLASS)) {
 					SourceFileLocation info = element.getAnnotation(SourceFileLocation.class);
-					allResources.add(info.file());
+					allResources.add(info);
+//					if (element.getKind().equals(ElementKind.INTERFACE)) {
+//						generateClass((TypeElement) element);
+//					}
 				}
 			}
 			allResources.forEach(it -> copySourceToResource(it));
@@ -67,12 +78,28 @@ public class SourceFileProcessor extends AbstractProcessor {
 		return true;
 	}
 
-	private void copySourceToResource(String path) {
+	private void copySourceToResource(SourceFileLocation info) {
+		String path = info.file();
 		String basePath = processingEnv.getOptions().get("basePath");
 		assert basePath != null;
 		String[] tokens = path.split("/");
 		Path sourcePath = Paths.get(basePath, path);
+		processingEnv.getMessager().printMessage(Diagnostic.Kind.MANDATORY_WARNING, "PROCESSING '" + sourcePath + "'");
 		try {
+			String content = new String(Files.readAllBytes(sourcePath));
+			for (SourceFileProperty property : info.properties()) {
+				int i = 0;
+				Matcher p = Pattern.compile(property.regex(), Pattern.MULTILINE | Pattern.DOTALL).matcher(content);
+				while (p.find()) {
+					i++;
+				}
+
+				// Ensure property has at least one match
+				if (i == 0) {
+					processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Property '" + property.name() + "' for '" + info.file() + "' not found");
+				}
+			}
+
 			FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/templates/" + tokens[0] + "/" + tokens[tokens.length - 1]);
 			try (OutputStream os = resource.openOutputStream()) {
 				Files.copy(sourcePath, os);
@@ -87,32 +114,46 @@ public class SourceFileProcessor extends AbstractProcessor {
 		return Collections.singleton("basePath");
 	}
 
-	private void generateClass(ExecutableElement element, SourceFileLocation info) {
-		String packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
-		String className = element.getSimpleName() + "Impl";
-		String qualifiedClassName = packageName + "." + className;
+	private void generateClass(TypeElement element) {
 		Messager messager = processingEnv.getMessager();
-		messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "PROCESSING " + qualifiedClassName);
-//		String sourceFileContent = generateSourceFileContent(packageName, className, element, info);
+		String packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
+		String className = ClassNameUtil.getClassName(element);
+		String qualifiedClassName = packageName + "." + className;
+		messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "PROCESSING " + ClassNameUtil.getClassName(element));
+		String sourceFileContent = generateSourceFileContent(packageName, className, element);
 
-//		try {
-//			JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(qualifiedClassName);
-//			try (Writer writer = sourceFile.openWriter()) {
-//				writer.write(sourceFileContent);
-//			}
-//		} catch (IOException e) {
-//			processingEnv.getMessager().printMessage(javax.tools.Diagnostic.Kind.ERROR, "Failed to generate class: " + e.getMessage());
-//		}
+		try {
+			JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(qualifiedClassName);
+			try (Writer writer = sourceFile.openWriter()) {
+				writer.write(sourceFileContent);
+			}
+		} catch (IOException e) {
+			processingEnv.getMessager().printMessage(javax.tools.Diagnostic.Kind.ERROR, "Failed to generate class: " + e.getMessage());
+		}
 	}
 
-//	private String generateSourceFileContent(String packageName, String className, TypeElement element, SourceFileLocation info) {
-//		return "package " + packageName + ";\n\n" +
-//			"public class " + className + " extends " + element.getSimpleName() + " {\n" +
-//			"    @Override\n" +
-//			"    public SourceFile getSourceFile() {\n" +
-//			"        // Implement loading of the file content from resources here\n" +
-//			"        return new SourceFile(\"" + info.path() + "\", \"" + info.name() + "\", content);\n" +
-//			"    }\n" +
-//			"}\n";
-//	}
+	private String generateSourceFileContent(String packageName, String className, TypeElement element) {
+		return String.join("\n",
+			"package " + packageName + ";",
+			"",
+			"public final class " + className + " implements " + ClassNameUtil.get(element).collect(Collectors.joining(".")) + " {",
+			"}");
+	}
+
+	private static class ClassNameUtil {
+		public static String getClassName(Element element) {
+			return get(element).collect(Collectors.joining("$")) + "Impl";
+		}
+
+		public static Stream<String> get(Element element) {
+			List<String> result = new ArrayList<>();
+
+			while (element != null && element.getKind() != ElementKind.PACKAGE) {
+				result.add(0, element.getSimpleName().toString());
+				element = element.getEnclosingElement();
+			}
+
+			return result.stream();
+		}
+	}
 }
