@@ -18,14 +18,11 @@ package nokeebuild;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.attributes.Usage;
-import org.gradle.api.capabilities.Capability;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
-
-import javax.annotation.Nullable;
 
 public class TemplatePlugin implements Plugin<Settings> {
 	@Override
@@ -58,23 +55,7 @@ public class TemplatePlugin implements Plugin<Settings> {
 					it.attributes(attributes -> {
 						attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_API));
 					});
-					it.getOutgoing().capability(new Capability() {
-						@Override
-						public String getGroup() {
-							return project.getGroup().toString();
-						}
-
-						@Override
-						public String getName() {
-							return project.getName() + "-templates";
-						}
-
-						@Nullable
-						@Override
-						public String getVersion() {
-							return project.getVersion().toString();
-						}
-					});
+					it.getOutgoing().capability(new TemplateCapability(project));
 					it.getOutgoing().artifact(jarTask);
 				});
 
@@ -85,23 +66,7 @@ public class TemplatePlugin implements Plugin<Settings> {
 					it.attributes(attributes -> {
 						attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME));
 					});
-					it.getOutgoing().capability(new Capability() {
-						@Override
-						public String getGroup() {
-							return project.getGroup().toString();
-						}
-
-						@Override
-						public String getName() {
-							return project.getName() + "-templates";
-						}
-
-						@Nullable
-						@Override
-						public String getVersion() {
-							return project.getVersion().toString();
-						}
-					});
+					it.getOutgoing().capability(new TemplateCapability(project));
 					it.getOutgoing().artifact(jarTask);
 				});
 			});
