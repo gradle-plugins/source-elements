@@ -24,7 +24,7 @@ public abstract class RegularFileContent {
 
 	public SourceFileElement withPath(String path) {
 		int pathIndex = path.lastIndexOf('/');
-		String p = path.substring(0, pathIndex - 1);
+		String p = path.substring(0, pathIndex);
 		String f = path.substring(pathIndex + 1);
 		return SourceFileElement.ofFile(Element.sourceFile(p, f, SourceFileElement.fromResource(this.getClass(), it -> {
 			it.putAll(properties);
