@@ -24,7 +24,7 @@ public abstract class SourceElements extends SourceElement {
 	public abstract List<SourceElement> getElements();
 
 	@Override
-	public List<SourceFile> getFiles() {
+	public final List<SourceFile> getFiles() {
 		List<SourceFile> files = new ArrayList<SourceFile>();
 		for (SourceElement element : getElements()) {
 			files.addAll(element.getFiles());
@@ -34,10 +34,15 @@ public abstract class SourceElements extends SourceElement {
 
 	@Override
 	// very important to avoid overriding the elements' sourceSetName
-	public void writeToProject(Path projectDir) {
+	public final void writeToProject(Path projectDir) {
 		for (SourceElement element : getElements()) {
 			element.writeToProject(projectDir);
 		}
+	}
+
+	@Override
+	public final String getSourceSetName() {
+		throw new UnsupportedOperationException("composing elements may contains mixed source set");
 	}
 
 	@Override
