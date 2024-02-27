@@ -17,37 +17,58 @@
 package nokeebuild;
 
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.capabilities.Capability;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.function.Supplier;
 
-class TemplateCapability implements Capability {
-	private final Project project;
+final class TemplateCapability implements Capability {
 	private static final String featureName = "templates";
+	public static final String TEMPLATE_CAPABILITY_APPENDIX = "-" + featureName;
+	private final Supplier<String> groupSupplier;
+	private final Supplier<String> nameSupplier;
+	private final Supplier<String> versionSupplier;
+	private final int hashCode;
 
 	public TemplateCapability(Project project) {
-		this.project = project;
+		// See ProjectDerivedCapability
+		this.hashCode = 31 * project.hashCode() + featureName.hashCode();
+		this.groupSupplier = () -> project.getGroup().toString();
+		this.nameSupplier = () -> project.getName();
+		this.versionSupplier = () -> project.getVersion().toString();
+	}
+
+	public TemplateCapability(ModuleDependency dependency) {
+		// See ImmutableCapability
+		this.hashCode = 31 * (dependency.getName() + TEMPLATE_CAPABILITY_APPENDIX).hashCode()
+			+ dependency.getGroup().hashCode();
+		this.groupSupplier = () -> dependency.getGroup();
+		this.nameSupplier = () -> dependency.getName();
+		this.versionSupplier = () -> null;
 	}
 
 	@Override
 	public String getGroup() {
-		return project.getGroup().toString();
+		return groupSupplier.get();
 	}
 
 	@Override
 	public String getName() {
-		return project.getName() + "-" + featureName;
+		return nameSupplier.get() + TEMPLATE_CAPABILITY_APPENDIX;
 	}
 
+	@Nullable
 	@Override
 	public String getVersion() {
-		return project.getVersion().toString();
+		return versionSupplier.get();
 	}
 
-	//region See ProjectDerivedCapability in Gradle codebase
+	//region See ProjectDerivedCapability and ImmutableCapability in Gradle codebase
 	@Override
 	public int hashCode() {
-		return 31 * project.hashCode() + featureName.hashCode();
+		return hashCode;
 	}
 
 	@Override
