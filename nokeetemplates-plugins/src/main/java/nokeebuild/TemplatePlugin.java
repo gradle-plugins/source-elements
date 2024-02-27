@@ -16,7 +16,12 @@
 
 package nokeebuild;
 
+import groovy.lang.Closure;
 import org.gradle.api.Plugin;
+import org.gradle.api.Project;
+import org.gradle.api.artifacts.ExternalModuleDependency;
+import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.attributes.Usage;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -24,51 +29,80 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.compile.JavaCompile;
 
-public class TemplatePlugin implements Plugin<Settings> {
+public class TemplatePlugin implements Plugin<Object> {
 	@Override
-	public void apply(Settings settings) {
+	public void apply(Object target) {
+		if (target instanceof Settings) {
+			doApply((Settings) target);
+		} else {
+			doApply((Project) target);
+		}
+	}
+
+	private void doApply(Settings settings) {
 		settings.getGradle().rootProject(project -> {
-			project.getPluginManager().apply("java-base");
-			project.getExtensions().getByType(SourceSetContainer.class).create("templates", sourceSet -> {
-				project.getDependencies().add(sourceSet.getAnnotationProcessorConfigurationName(), "dev.gradleplugins:source-elements-annotation-processor:latest.release");
-				project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures-source-elements:latest.release");
+			project.getPluginManager().apply(TemplatePlugin.class);
+		});
+	}
 
-				project.getTasks().named(sourceSet.getCompileJavaTaskName(), JavaCompile.class, task -> {
-					task.getOptions().getCompilerArgs().add("-AbasePath=" + project.getProjectDir());
+	private void doApply(Project project) {
+		project.getPluginManager().apply("java-base");
+
+		project.getExtensions().getExtraProperties().set("templates", new Closure(project) {
+			private final TemplateDependencyModifier delegate = TemplateDependencyModifier.forProject(project);
+
+			public ProjectDependency doCall(Project project) {
+				return delegate.modify(project);
+			}
+
+			public ExternalModuleDependency doCall(CharSequence dependencyNotation) {
+				return delegate.modify(dependencyNotation);
+			}
+
+			public <DependencyType extends ModuleDependency> DependencyType doCall(DependencyType dependency) {
+				return delegate.modify(dependency);
+			}
+		});
+
+		project.getExtensions().getByType(SourceSetContainer.class).create("templates", sourceSet -> {
+			project.getDependencies().add(sourceSet.getAnnotationProcessorConfigurationName(), "dev.gradleplugins:source-elements-annotation-processor:latest.release");
+			project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures-source-elements:latest.release");
+
+			project.getTasks().named(sourceSet.getCompileJavaTaskName(), JavaCompile.class, task -> {
+				task.getOptions().getCompilerArgs().add("-AbasePath=" + project.getProjectDir());
+			});
+
+			final TaskProvider<Jar> jarTask = project.getTasks().register(sourceSet.getJarTaskName(), Jar.class, task -> {
+				task.from(sourceSet.getOutput());
+			});
+
+			project.getConfigurations().create(sourceSet.getApiConfigurationName(), it -> {
+				it.setCanBeResolved(false);
+				it.setCanBeConsumed(false);
+			});
+
+			project.getConfigurations().getByName(sourceSet.getImplementationConfigurationName()).extendsFrom(project.getConfigurations().getByName(sourceSet.getApiConfigurationName()));
+
+			project.getConfigurations().create(sourceSet.getApiElementsConfigurationName(), it -> {
+				it.setCanBeConsumed(true);
+				it.setCanBeResolved(false);
+				it.extendsFrom(project.getConfigurations().getByName(sourceSet.getApiConfigurationName()));
+				it.attributes(attributes -> {
+					attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_API));
 				});
+				it.getOutgoing().capability(new TemplateCapability(project));
+				it.getOutgoing().artifact(jarTask);
+			});
 
-				final TaskProvider<Jar> jarTask = project.getTasks().register(sourceSet.getJarTaskName(), Jar.class, task -> {
-					task.from(sourceSet.getOutput());
+			project.getConfigurations().create(sourceSet.getRuntimeElementsConfigurationName(), it -> {
+				it.setCanBeConsumed(true);
+				it.setCanBeResolved(false);
+				it.extendsFrom(project.getConfigurations().getByName(sourceSet.getImplementationConfigurationName()));
+				it.attributes(attributes -> {
+					attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME));
 				});
-
-				project.getConfigurations().create(sourceSet.getApiConfigurationName(), it -> {
-					it.setCanBeResolved(false);
-					it.setCanBeConsumed(false);
-				});
-
-				project.getConfigurations().getByName(sourceSet.getImplementationConfigurationName()).extendsFrom(project.getConfigurations().getByName(sourceSet.getApiConfigurationName()));
-
-				project.getConfigurations().create(sourceSet.getApiElementsConfigurationName(), it -> {
-					it.setCanBeConsumed(true);
-					it.setCanBeResolved(false);
-					it.extendsFrom(project.getConfigurations().getByName(sourceSet.getApiConfigurationName()));
-					it.attributes(attributes -> {
-						attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_API));
-					});
-					it.getOutgoing().capability(new TemplateCapability(project));
-					it.getOutgoing().artifact(jarTask);
-				});
-
-				project.getConfigurations().create(sourceSet.getRuntimeElementsConfigurationName(), it -> {
-					it.setCanBeConsumed(true);
-					it.setCanBeResolved(false);
-					it.extendsFrom(project.getConfigurations().getByName(sourceSet.getImplementationConfigurationName()));
-					it.attributes(attributes -> {
-						attributes.attribute(Usage.USAGE_ATTRIBUTE, project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME));
-					});
-					it.getOutgoing().capability(new TemplateCapability(project));
-					it.getOutgoing().artifact(jarTask);
-				});
+				it.getOutgoing().capability(new TemplateCapability(project));
+				it.getOutgoing().artifact(jarTask);
 			});
 		});
 	}
