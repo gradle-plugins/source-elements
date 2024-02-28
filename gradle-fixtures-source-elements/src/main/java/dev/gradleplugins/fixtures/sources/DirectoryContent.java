@@ -31,8 +31,26 @@ import java.util.stream.Collectors;
 
 import static dev.gradleplugins.fixtures.sources.SourceFileElement.fromResource;
 
-public abstract class DirectoryContent {
+public abstract class DirectoryContent extends SourceElement {
 	protected final Map<String, String> properties = new LinkedHashMap<>();
+
+	@Override
+	public List<SourceFile> getFiles() {
+		String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
+		String content = null;
+		if (tokens.length == 1) {
+			content = fromResource(tokens[0] + ".sample");
+		} else {
+			content = fromResource(tokens[0] + "/" + tokens[tokens.length - 1] + ".sample");
+		}
+
+		String f = tokens[tokens.length - 1];
+
+		return Arrays.stream(content.split("\n")).map(it -> {
+				String name = it.substring(it.indexOf(f) + f.length() + 1);
+				return sourceFile("", name, readAll(it));
+			}).collect(Collectors.toList());
+	}
 
 	public SourceElement withPath(String path) {
 		String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
@@ -41,7 +59,6 @@ public abstract class DirectoryContent {
 		int pathIndex = path.lastIndexOf('/');
 		String p = path.substring(0, pathIndex);
 		String f = path.substring(pathIndex + 1);
-
 
 		return new SourceElement() {
 			@Override
