@@ -25,8 +25,9 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 final class TemplateCapability implements Capability {
-	private static final String featureName = "templates";
-	public static final String TEMPLATE_CAPABILITY_APPENDIX = "-" + featureName;
+	public static final String TEMPLATE_CAPABILITY_FEATURE_NAME = "templates";
+	private static final String featureName = TEMPLATE_CAPABILITY_FEATURE_NAME;
+	public static final String TEMPLATE_CAPABILITY_APPENDIX = "-" + TEMPLATE_CAPABILITY_FEATURE_NAME;
 	private final Supplier<String> groupSupplier;
 	private final Supplier<String> nameSupplier;
 	private final Supplier<String> versionSupplier;

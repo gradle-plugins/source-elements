@@ -39,6 +39,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
 
 public final class SourceFile {
 	private final String path;
@@ -64,7 +67,8 @@ public final class SourceFile {
 	}
 
 	public Path writeToDirectory(Path base) {
-		final Path file = base.resolve(String.join(File.separator, path, name));
+		String path = Stream.of(this.path, name).filter(it -> !it.isEmpty()).collect(joining(File.separator));
+		final Path file = base.resolve(path);
 		writeToFile(file);
 		return file;
 	}
@@ -78,8 +82,7 @@ public final class SourceFile {
 		try {
 			Files.createDirectories(file.getParent());
 			Files.write(file, content.getBytes(Charset.defaultCharset()));
-		} catch (
-			IOException ex) {
+		} catch (IOException ex) {
 			throw new UncheckedIOException(String.format("Unable to create source file at '%s'.", file), ex);
 		}
 	}

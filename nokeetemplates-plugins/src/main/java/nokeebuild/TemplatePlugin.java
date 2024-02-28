@@ -65,15 +65,13 @@ public class TemplatePlugin implements Plugin<Object> {
 		});
 
 		project.getExtensions().getByType(SourceSetContainer.class).create("templates", sourceSet -> {
-			project.getDependencies().add(sourceSet.getAnnotationProcessorConfigurationName(), "dev.gradleplugins:source-elements-annotation-processor:latest.release");
-			project.getDependencies().add(sourceSet.getImplementationConfigurationName(), "dev.gradleplugins:gradle-fixtures-source-elements:latest.release");
-
 			project.getTasks().named(sourceSet.getCompileJavaTaskName(), JavaCompile.class, task -> {
 				task.getOptions().getCompilerArgs().add("-AbasePath=" + project.getProjectDir());
 			});
 
 			final TaskProvider<Jar> jarTask = project.getTasks().register(sourceSet.getJarTaskName(), Jar.class, task -> {
 				task.from(sourceSet.getOutput());
+				task.getArchiveClassifier().set(TemplateCapability.TEMPLATE_CAPABILITY_FEATURE_NAME);
 			});
 
 			project.getConfigurations().create(sourceSet.getApiConfigurationName(), it -> {
@@ -104,6 +102,9 @@ public class TemplatePlugin implements Plugin<Object> {
 				it.getOutgoing().capability(new TemplateCapability(project));
 				it.getOutgoing().artifact(jarTask);
 			});
+
+			project.getDependencies().add(sourceSet.getAnnotationProcessorConfigurationName(), "dev.gradleplugins:source-elements-annotation-processor:latest.release");
+			project.getDependencies().add(sourceSet.getApiConfigurationName(), "dev.gradleplugins:gradle-fixtures-source-elements:latest.release");
 		});
 	}
 }
