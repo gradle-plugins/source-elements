@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-package dev.gradleplugins.fixtures.sources;
+package dev.gradleplugins.fixtures.sources.nativebase;
 
+import dev.gradleplugins.fixtures.sources.Element;
+import dev.gradleplugins.fixtures.sources.SourceFile;
+import dev.gradleplugins.fixtures.sources.SourceFileElement;
+import dev.gradleplugins.fixtures.sources.SwiftSourceFileElement;
 import dev.gradleplugins.fixtures.sources.annotations.SourceFileLocation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
-public abstract class RegularFileContent extends SourceFileElement {
+// TODO: Align the implementation with RegularFileContent
+public abstract class SwiftFileElement extends SwiftSourceFileElement {
 	protected final Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public final SourceFile getSourceFile() {
-		String name = Optional.ofNullable(properties.get("name")).orElseGet(() -> {
-			String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
-			return tokens[tokens.length - 1];
-		});
+		String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
+		String name = tokens[tokens.length - 1];
 		return sourceFile("", name, SourceFileElement.fromResource(this.getClass(), it -> {
 			it.putAll(properties);
 		}));
 	}
 
 	public SourceFileElement withPath(String path) {
-		String name = Optional.ofNullable(properties.get("name")).orElseGet(() -> {
-			String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
-			return tokens[tokens.length - 1];
-		});
+		String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
+		String name = tokens[tokens.length - 1];
 		return SourceFileElement.ofFile(Element.sourceFile(path, name, SourceFileElement.fromResource(this.getClass(), it -> {
 			it.putAll(properties);
 		})));
@@ -53,6 +53,6 @@ public abstract class RegularFileContent extends SourceFileElement {
 	}
 
 	protected String getPath() {
-		return "";
+		return "swift";
 	}
 }
