@@ -20,13 +20,12 @@ import dev.gradleplugins.fixtures.sources.annotations.SourceFileLocation;
 import dev.gradleplugins.fixtures.sources.annotations.SourceFileProperty;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
+import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
@@ -35,7 +34,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -90,7 +88,6 @@ public class SourceFileProcessor extends AbstractProcessor {
 		assert basePath != null;
 		String[] tokens = path.split("/");
 		Path sourcePath = Paths.get(basePath, path);
-		processingEnv.getMessager().printMessage(Diagnostic.Kind.MANDATORY_WARNING, "PROCESSING '" + sourcePath + "'");
 
 		if (Files.isDirectory(sourcePath)) {
 			copyDirToResource(Paths.get(basePath), sourcePath, info.excludes());
@@ -106,7 +103,7 @@ public class SourceFileProcessor extends AbstractProcessor {
 
 					// Ensure property has at least one match
 					if (i == 0) {
-						processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Property '" + property.name() + "' for '" + info.file() + "' not found");
+						processingEnv.getMessager().printMessage(Kind.ERROR, "Property '" + property.name() + "' for '" + info.file() + "' not found");
 					}
 				}
 
@@ -114,9 +111,8 @@ public class SourceFileProcessor extends AbstractProcessor {
 				try (OutputStream os = resource.openOutputStream()) {
 					Files.copy(sourcePath, os);
 				}
-			} catch (
-				IOException ex) {
-				processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Failed to copy file: " + ex.getMessage());
+			} catch (IOException ex) {
+				processingEnv.getMessager().printMessage(Kind.ERROR, "Failed to copy file: " + ex.getMessage());
 			}
 		}
 	}
@@ -165,11 +161,9 @@ public class SourceFileProcessor extends AbstractProcessor {
 	}
 
 	private void generateClass(TypeElement element) {
-		Messager messager = processingEnv.getMessager();
 		String packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
 		String className = ClassNameUtil.getClassName(element);
 		String qualifiedClassName = packageName + "." + className;
-		messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "PROCESSING " + ClassNameUtil.getClassName(element));
 		String sourceFileContent = generateSourceFileContent(packageName, className, element);
 
 		try {
@@ -178,7 +172,7 @@ public class SourceFileProcessor extends AbstractProcessor {
 				writer.write(sourceFileContent);
 			}
 		} catch (IOException e) {
-			processingEnv.getMessager().printMessage(javax.tools.Diagnostic.Kind.ERROR, "Failed to generate class: " + e.getMessage());
+			processingEnv.getMessager().printMessage(Kind.ERROR, "Failed to generate class: " + e.getMessage());
 		}
 	}
 
