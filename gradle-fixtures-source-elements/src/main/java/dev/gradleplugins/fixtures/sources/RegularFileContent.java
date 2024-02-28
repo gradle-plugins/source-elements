@@ -16,17 +16,33 @@
 
 package dev.gradleplugins.fixtures.sources;
 
+import dev.gradleplugins.fixtures.sources.annotations.SourceFileLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class RegularFileContent {
+public abstract class RegularFileContent extends SourceFileElement {
 	protected final Map<String, String> properties = new LinkedHashMap<>();
 
+	@Override
+	public SourceFile getSourceFile() {
+		String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
+		String name = tokens[tokens.length - 1];
+		return sourceFile("", name, SourceFileElement.fromResource(this.getClass(), it -> {
+			it.putAll(properties);
+		}));
+	}
+
 	public SourceFileElement withPath(String path) {
-		int pathIndex = path.lastIndexOf('/');
-		String p = path.substring(0, pathIndex);
-		String f = path.substring(pathIndex + 1);
-		return SourceFileElement.ofFile(Element.sourceFile(p, f, SourceFileElement.fromResource(this.getClass(), it -> {
+		String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
+		String name = tokens[tokens.length - 1];
+		return SourceFileElement.ofFile(Element.sourceFile(path, name, SourceFileElement.fromResource(this.getClass(), it -> {
+			it.putAll(properties);
+		})));
+	}
+
+	public SourceFileElement withPath(String path, String name) {
+		return SourceFileElement.ofFile(Element.sourceFile(path, name, SourceFileElement.fromResource(this.getClass(), it -> {
 			it.putAll(properties);
 		})));
 	}
