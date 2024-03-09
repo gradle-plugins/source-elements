@@ -31,7 +31,7 @@ public abstract class RegularFileContent extends SourceFileElement {
 			String[] tokens = this.getClass().getAnnotation(SourceFileLocation.class).file().split("/");
 			return tokens[tokens.length - 1];
 		});
-		return sourceFile("", name, SourceFileElement.fromResource(this.getClass(), it -> {
+		return sourceFile(getPath(), name, SourceFileElement.fromResource(this.getClass(), it -> {
 			it.putAll(properties);
 		}));
 	}
