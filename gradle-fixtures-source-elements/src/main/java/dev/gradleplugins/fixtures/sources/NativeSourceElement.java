@@ -16,32 +16,63 @@
 
 package dev.gradleplugins.fixtures.sources;
 
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 public abstract class NativeSourceElement extends SourceElement {
+	private final SourceElement delegate;
+
+	protected NativeSourceElement() {
+		this.delegate = SourceElement.ofElements(getHeaders().withSourceSetName(getSourceSetName()), getSources().withSourceSetName(getSourceSetName()));
+	}
+
 	public SourceElement getHeaders() {
-		return empty();
+		return empty().withSourceSetName(getSourceSetName());
 	}
 
 	public abstract SourceElement getSources();
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public List<SourceFile> getFiles() {
-		List<SourceFile> files = new ArrayList<>();
-		files.addAll(getSources().getFiles());
-		files.addAll(getHeaders().getFiles());
-		return files;
+		return delegate.getFiles();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public <R> R accept(Visitor<R> visitor) {
-		return visitor.visit(this);
+	public void writeToProject(Path projectDir) {
+		delegate.writeToProject(projectDir);
 	}
 
-	public List<String> getSourceFileNamesWithoutHeaders() {
-		// TODO: Maybe a better implementation would be getHeaders().getFiles()
-		return getSourceFileNames().stream().filter(sourceFileName -> !sourceFileName.endsWith(".h")).collect(Collectors.toList());
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public NativeSourceElement withSourceSetName(String sourceSetName) {
+		return new NativeSourceElement() {
+			@Override
+			public SourceElement getHeaders() {
+				return NativeSourceElement.this.getHeaders().withSourceSetName(sourceSetName);
+			}
+
+			@Override
+			public SourceElement getSources() {
+				return NativeSourceElement.this.getSources().withSourceSetName(sourceSetName);
+			}
+
+			@Override
+			public String getSourceSetName() {
+				return sourceSetName;
+			}
+		};
+	}
+
+	public final Set<String> getSourceFileNamesWithoutHeaders() {
+		return getSources().getSourceFileNames();
 	}
 
 	public static NativeSourceElement ofSources(SourceElement sources) {
@@ -49,6 +80,11 @@ public abstract class NativeSourceElement extends SourceElement {
 			@Override
 			public SourceElement getSources() {
 				return sources;
+			}
+
+			@Override
+			public String getSourceSetName() {
+				return sources.getSourceSetName();
 			}
 		};
 	}

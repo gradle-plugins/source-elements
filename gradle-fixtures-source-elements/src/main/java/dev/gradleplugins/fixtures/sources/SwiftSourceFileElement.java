@@ -19,31 +19,20 @@ package dev.gradleplugins.fixtures.sources;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represent a single Swift source file.
+ */
 public abstract class SwiftSourceFileElement extends SwiftSourceElement {
+	/**
+	 * {@return the source file of this element}
+	 */
 	public abstract SourceFile getSourceFile();
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<SourceFile> getFiles() {
 		return Collections.singletonList(getSourceFile());
 	}
-
-	//	public SwiftSourceFileElement withImport(String moduleToImport) {
-//		return new SwiftSourceFileElement() {
-//			private final SourceFile delegate = SwiftSourceFileElement.this.getSourceFile();
-//
-//			@Override
-//			public SourceFile getSourceFile() {
-//				return sourceFile(delegate.getPath(), delegate.getName(), String.join("\n",
-//					"import " + moduleToImport,
-//					"",
-//					delegate.getContent()
-//				));
-//			}
-//
-//			@Override
-//			public String getSourceSetName() {
-//				return SwiftSourceFileElement.this.getSourceSetName();
-//			}
-//		};
-//	}
 }

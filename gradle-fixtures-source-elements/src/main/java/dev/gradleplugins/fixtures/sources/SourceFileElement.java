@@ -20,21 +20,25 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A single source file.
+ * Represent a single source file.
  */
 public abstract class SourceFileElement extends SourceElement {
+	/**
+	 * {@return the source file of this element}
+	 */
 	public abstract SourceFile getSourceFile();
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public List<SourceFile> getFiles() {
+	public final List<SourceFile> getFiles() {
 		return Collections.singletonList(getSourceFile());
 	}
 
-	@Override
-	public <R> R accept(Visitor<R> visitor) {
-		return visitor.visit(this);
-	}
-
+	/**
+	 * {@return a new source element for the specified source file}
+	 */
 	public static SourceFileElement ofFile(final SourceFile file) {
 		return new SourceFileElement() {
 			@Override

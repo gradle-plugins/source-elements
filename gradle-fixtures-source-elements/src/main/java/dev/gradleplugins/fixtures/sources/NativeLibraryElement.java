@@ -16,29 +16,97 @@
 
 package dev.gradleplugins.fixtures.sources;
 
-import static dev.gradleplugins.fixtures.sources.NativeElements.lib;
+import java.util.List;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
+/**
+ * Represents a native library with public/private headers and sources.
+ */
 public abstract class NativeLibraryElement extends NativeSourceElement {
+	/**
+	 * {@return the public headers of this library element}
+	 */
 	public abstract SourceElement getPublicHeaders();
 
+	/**
+	 * {@return the private headers of this library element}
+	 */
 	public SourceElement getPrivateHeaders() {
-		return empty();
+		return empty().withSourceSetName(getSourceSetName());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public SourceElement getHeaders() {
-		return ofElements(getPublicHeaders(), getPrivateHeaders());
-	}
-
-	@Override
-	public <R> R accept(Visitor<R> visitor) {
-		return visitor.visit(this);
+	public final SourceElement getHeaders() {
+		return ofElements(getPublicHeaders().withSourceSetName(getSourceSetName()), getPrivateHeaders().withSourceSetName(getSourceSetName()));
 	}
 
 	/**
 	 * Returns a copy of this library with the public headers the 'public' headers directory.
 	 */
-	public SourceElement asLib() {
-		return as(lib());
+	public NativeSourceElement asLib() {
+		return new NativeSourceElement() {
+			@Override
+			public SourceElement getHeaders() {
+				return SourceElement.ofElements(
+					NativeLibraryElement.this.getPrivateHeaders(),
+					withFiles(NativeLibraryElement.this.getPublicHeaders(), files -> {
+						return files.stream().map(sourceFile -> {
+							int idx = sourceFile.getPath().indexOf('/');
+							if (idx == -1) {
+								return new SourceFile("public", sourceFile.getName(), sourceFile.getContent());
+							} else {
+								return new SourceFile("public" + sourceFile.getPath().substring(idx), sourceFile.getName(), sourceFile.getContent());
+							}
+						}).collect(Collectors.toList());
+					})
+				);
+			}
+
+			private SourceElement withFiles(SourceElement self, UnaryOperator<List<SourceFile>> operation) {
+				return SourceElement.ofFiles(operation.apply(self.getFiles())).withSourceSetName(self.getSourceSetName());
+			}
+
+			@Override
+			public SourceElement getSources() {
+				return NativeLibraryElement.this.getSources();
+			}
+
+			@Override
+			public String getSourceSetName() {
+				return NativeLibraryElement.this.getSourceSetName();
+			}
+		};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public NativeLibraryElement withSourceSetName(String sourceSetName) {
+		return new NativeLibraryElement() {
+			@Override
+			public SourceElement getPublicHeaders() {
+				return NativeLibraryElement.this.getPublicHeaders().withSourceSetName(sourceSetName);
+			}
+
+			@Override
+			public SourceElement getPrivateHeaders() {
+				return NativeLibraryElement.this.getPrivateHeaders().withSourceSetName(sourceSetName);
+			}
+
+			@Override
+			public String getSourceSetName() {
+				return sourceSetName;
+			}
+
+			@Override
+			public SourceElement getSources() {
+				return NativeLibraryElement.this.getSources().withSourceSetName(sourceSetName);
+			}
+		};
 	}
 }

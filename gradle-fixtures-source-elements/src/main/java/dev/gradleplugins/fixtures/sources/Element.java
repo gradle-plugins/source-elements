@@ -24,4 +24,8 @@ public abstract class Element {
 	protected static SourceFile sourceFile(String path, String name, String content) {
 		return new SourceFile(path, name, content);
 	}
+
+	protected static SourceFile sourceFile(String sourcePath, String content) {
+		return SourceFile.of(sourcePath, content);
+	}
 }

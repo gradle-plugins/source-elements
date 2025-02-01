@@ -18,16 +18,13 @@ package dev.gradleplugins.fixtures.sources;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * An element containing zero or more source files.
+ * Represent an element containing zero or more source files.
  */
 public abstract class SourceElement extends Element {
 	/**
@@ -119,24 +116,6 @@ public abstract class SourceElement extends Element {
 	public interface QueryOperation extends UnaryOperator<SourceElement> {
 	}
 
-	public <R> R accept(Visitor<R> visitor) {
-		return visitor.visit(this);
-	}
-
-	public interface Visitor<R> {
-		R visit(SourceElement element);
-
-		R visit(SourceFileElement element);
-
-		R visit(NativeSourceElement element);
-
-		R visit(NativeLibraryElement element);
-
-		R visit(NativeSourceFileElement element);
-
-		R visit(SourceElements element);
-	}
-
 	public static SourceElement empty() {
 		return new SourceElement() {
 			@Override
@@ -150,30 +129,19 @@ public abstract class SourceElement extends Element {
 	 * Returns a source element that contains the union of the given elements.
 	 * Each element will be written individually.
 	 */
-	public static SourceElement ofElements(final SourceElement... elements) {
-		return ofElements(Arrays.asList(elements));
+	public static CompositeSourceElement ofElements(final SourceElement... elements) {
+		return new CompositeSourceElement(Arrays.asList(elements));
 	}
 
-	public static SourceElement ofElements(Iterable<SourceElement> elements) {
-		return new SourceElements() {
-			@Override
-			public List<SourceElement> getElements() {
-				return StreamSupport.stream(elements.spliterator(), false)
-					.collect(Collectors.toList());
-			}
-		};
+	public static CompositeSourceElement ofElements(Iterable<SourceElement> elements) {
+		return new CompositeSourceElement(StreamSupport.stream(elements.spliterator(), false).collect(Collectors.toList()));
 	}
 
 	/**
 	 * Returns a source element that contains the given files
 	 */
 	public static SourceElement ofFiles(final SourceFile... files) {
-		return new SourceElement() {
-			@Override
-			public List<SourceFile> getFiles() {
-				return Arrays.asList(files);
-			}
-		};
+		return ofFiles(Arrays.asList(files));
 	}
 
 	/**
@@ -188,7 +156,11 @@ public abstract class SourceElement extends Element {
 		};
 	}
 
-	public final List<String> getSourceFileNames() {
-		return getFiles().stream().map(SourceFile::getName).collect(Collectors.toList());
+	public final Set<String> getSourceFileNames() {
+		Set<String> result = new LinkedHashSet<>();
+		for (SourceFile file : getFiles()) {
+			result.add(file.getName());
+		}
+		return result;
 	}
 }

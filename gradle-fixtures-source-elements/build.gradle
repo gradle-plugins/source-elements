@@ -6,3 +6,25 @@ description = 'Gradle fixtures'
 
 group = 'dev.gradleplugins'
 version = '1.0'
+
+repositories {
+	mavenCentral()
+}
+
+testing {
+	suites {
+		test {
+			useJUnitJupiter('5.11.4')
+
+			targets.configureEach {
+				testTask.configure {
+					systemProperty 'junit.jupiter.tempdir.cleanup.mode.default', 'ON_SUCCESS'
+				}
+			}
+
+			dependencies {
+				implementation 'dev.nokee.commons:commons-hamcrest'
+			}
+		}
+	}
+}

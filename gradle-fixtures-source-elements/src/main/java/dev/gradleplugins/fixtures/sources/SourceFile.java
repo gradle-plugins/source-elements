@@ -37,6 +37,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -127,16 +128,62 @@ public final class SourceFile {
 
 	public static SourceFile from(Path sourcePath, ContentLoader loader) {
 		try {
-			String name = sourcePath.getFileName().toString();
-			String path = sourcePath.getParent().toString();
-			String content = loader.load();
-			return new SourceFile(path, name, content);
+			return of(sourcePath, loader.load());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
+	public static SourceFile of(String sourcePath, String content) {
+		return of(Paths.get(sourcePath), content);
+	}
+
+	public static SourceFile of(Path sourcePath, String content) {
+		assert !sourcePath.isAbsolute() : "'sourcePath' must be relative";
+		String name = sourcePath.getFileName().toString();
+		String path = sourcePath.getParent().toString();
+		return new SourceFile(path, name, content);
+	}
+
 	public interface ContentLoader {
 		String load() throws IOException;
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static final class Builder {
+		private String path;
+		private String name;
+		private String content;
+
+		public Builder withPath(String path) {
+			this.path = path;
+			return this;
+		}
+
+		public Builder withName(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public Builder withContent(String content) {
+			this.content = content;
+			return this;
+		}
+
+		public Builder withContent(ContentLoader loader) {
+			try {
+				this.content = loader.load();
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			return this;
+		}
+
+		public SourceFile build() {
+			return new SourceFile(path, name, content);
+		}
 	}
 }

@@ -21,18 +21,19 @@ public abstract class NativeSourceFileElement extends NativeLibraryElement {
 
 	public abstract SourceFileElement getSource();
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SourceElement getPublicHeaders() {
-		return getHeader();
+		return getHeader().withSourceSetName(getSourceSetName());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public final SourceElement getSources() {
-		return getSource();
-	}
-
-	@Override
-	public final <R> R accept(Visitor<R> visitor) {
-		return visitor.visit(this);
+		return getSource().withSourceSetName(getSourceSetName());
 	}
 }
