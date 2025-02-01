@@ -9,7 +9,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 
-import static dev.nokee.commons.hamcrest.gradle.FileSystemMatchers.aFile;
 import static dev.nokee.commons.hamcrest.gradle.FileSystemMatchers.hasRelativeDescendants;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -52,10 +51,10 @@ class NativeSourceElementTests {
 		};
 		subject.writeToProject(testDirectory);
 
-		assertThat(testDirectory, aFile(hasRelativeDescendants(
+		assertThat(testDirectory, hasRelativeDescendants(
 			"src/test/c/main.c",
 			"src/test/headers/foo.h"
-		)));
+		));
 	}
 
 	@Test
@@ -77,10 +76,10 @@ class NativeSourceElementTests {
 
 		subject.writeToProject(testDirectory);
 
-		assertThat(testDirectory, aFile(hasRelativeDescendants(
+		assertThat(testDirectory, hasRelativeDescendants(
 			"src/integTest/c/main.c",
 			"src/integTest/headers/foo.h"
-		)));
+		));
 	}
 
 	@Test
