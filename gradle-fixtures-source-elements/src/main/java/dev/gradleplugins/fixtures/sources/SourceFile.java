@@ -124,4 +124,19 @@ public final class SourceFile {
 			", content='" + firstContentLine(content) + '\'' +
 			'}';
 	}
+
+	public static SourceFile from(Path sourcePath, ContentLoader loader) {
+		try {
+			String name = sourcePath.getFileName().toString();
+			String path = sourcePath.getParent().toString();
+			String content = loader.load();
+			return new SourceFile(path, name, content);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	public interface ContentLoader {
+		String load() throws IOException;
+	}
 }
