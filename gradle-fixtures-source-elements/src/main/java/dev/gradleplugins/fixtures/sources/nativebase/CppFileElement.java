@@ -18,6 +18,7 @@ package dev.gradleplugins.fixtures.sources.nativebase;
 
 import dev.gradleplugins.fixtures.sources.RegularFileContent;
 
+@Deprecated
 public abstract class CppFileElement extends RegularFileContent {
 	@Override
 	protected String getPath() {

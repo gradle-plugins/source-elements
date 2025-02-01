@@ -18,6 +18,7 @@ package dev.gradleplugins.fixtures.sources;
 
 import java.nio.file.Path;
 
+@Deprecated // OR extends from Element directly
 public class DirectoryElement extends DirectoryContent {
 	@Override
 	public void writeToProject(Path projectDir) {

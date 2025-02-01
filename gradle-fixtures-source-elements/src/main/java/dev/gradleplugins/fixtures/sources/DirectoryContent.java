@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static dev.gradleplugins.fixtures.sources.SourceFileElement.fromResource;
 
+@Deprecated
 public abstract class DirectoryContent extends SourceElement {
 	protected final Map<String, String> properties = new LinkedHashMap<>();
 

@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Deprecated
 public abstract class RegularFileContent extends SourceFileElement {
 	protected final Map<String, String> properties = new LinkedHashMap<>();
 

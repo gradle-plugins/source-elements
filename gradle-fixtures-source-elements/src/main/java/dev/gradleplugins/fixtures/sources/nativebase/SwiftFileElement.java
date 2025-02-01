@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 // TODO: Align the implementation with RegularFileContent
+@Deprecated
 public abstract class SwiftFileElement extends SwiftSourceFileElement {
 	protected final Map<String, String> properties = new LinkedHashMap<>();
 
