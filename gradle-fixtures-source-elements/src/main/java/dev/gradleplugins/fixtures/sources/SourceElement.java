@@ -42,6 +42,20 @@ public abstract class SourceElement extends Element {
 		return "main";
 	}
 
+	public SourceElement withSourceSetName(String sourceSetName) {
+		return new SourceElement() {
+			@Override
+			public List<SourceFile> getFiles() {
+				return SourceElement.this.getFiles();
+			}
+
+			@Override
+			public String getSourceSetName() {
+				return sourceSetName;
+			}
+		};
+	}
+
 	/**
 	 * Writes the source files of this element to the given project, using the Gradle convention for source layout.
 	 */
