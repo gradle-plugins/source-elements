@@ -163,4 +163,55 @@ public abstract class SourceElement extends Element {
 		}
 		return result;
 	}
+
+	public static SourceElement fromResource(String resourcePath) {
+//		DelegatedElements.sourceOf()
+		throw new UnsupportedOperationException();
+	}
+
+	public static SourceElement fromResource(Class<? extends SourceElement> type) {
+		StringBuilder filename = new StringBuilder();
+		filename.append(type.getSimpleName());
+		Class<?> c = type;
+		while ((c = c.getEnclosingClass()) != null) {
+			filename.insert(0, c.getSimpleName() + "$");
+		}
+		return fromResource(type.getPackage().getName().replace('.', '/') + "/" + filename + ".xml");
+	}
+
+	public abstract static class FromResource extends SourceElement {
+		private final SourceElement delegate;
+
+		protected FromResource() {
+			this.delegate = DelegatedElements.sourceOf(getClass());
+		}
+
+		protected FromResource(SourceElement delegate) {
+			this.delegate = delegate;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final SourceElement withSourceSetName(String sourceSetName) {
+			return super.withSourceSetName(sourceSetName);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final List<SourceFile> getFiles() {
+			return delegate.getFiles();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override // allow override
+		public String getSourceSetName() {
+			return delegate.getSourceSetName();
+		}
+	}
 }

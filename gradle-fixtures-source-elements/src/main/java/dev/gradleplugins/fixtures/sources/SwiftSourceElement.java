@@ -29,4 +29,29 @@ public abstract class SwiftSourceElement extends SourceElement {
 			}
 		};
 	}
+
+	/**
+	 * Represents a source element definition coming from XML resource.
+	 */
+    public abstract static class FromResource extends SwiftSourceElement {
+        private final SourceElement delegate;
+
+        protected FromResource() {
+            this.delegate = DelegatedElements.sourceOf(getClass());
+        }
+
+        protected FromResource(SourceElement delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public final List<SourceFile> getFiles() {
+            return delegate.getFiles();
+        }
+
+        @Override // allow override
+        public String getSourceSetName() {
+            return delegate.getSourceSetName();
+        }
+    }
 }

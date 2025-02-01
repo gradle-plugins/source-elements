@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import static dev.gradleplugins.fixtures.sources.DelegatedElements.nativeFiles;
+
 /**
  * Represents a native library with public/private headers and sources.
  */
@@ -108,5 +110,69 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 				return NativeLibraryElement.this.getSources().withSourceSetName(sourceSetName);
 			}
 		};
+	}
+
+	public abstract static class FromResource extends NativeLibraryElement {
+		private final NativeLibraryElement delegate;
+
+		protected FromResource() {
+			this.delegate = (NativeLibraryElement) DelegatedElements.sourceOf(getClass()).as(nativeFiles());
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final SourceElement getPublicHeaders() {
+			return delegate.getPublicHeaders();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final SourceElement getPrivateHeaders() {
+			return delegate.getPrivateHeaders();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final SourceElement getSources() {
+			return delegate.getSources();
+		}
+
+		public NativeLibraryElement withSources(SourceElement sources) {
+			return new NativeLibraryElement() {
+				@Override
+				public SourceElement getSources() {
+					return sources;
+				}
+
+				@Override
+				public SourceElement getPublicHeaders() {
+					return delegate.getPublicHeaders();
+				}
+
+				@Override
+				public SourceElement getPrivateHeaders() {
+					return delegate.getPrivateHeaders();
+				}
+
+				@Override
+				public String getSourceSetName() {
+					return delegate.getSourceSetName();
+				}
+			};
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override // allow override
+		public String getSourceSetName() {
+			return delegate.getSourceSetName();
+		}
 	}
 }
