@@ -58,6 +58,11 @@ public abstract class SourceElement extends Element {
 		writeToProject(projectDir.toPath());
 	}
 
+	public SourceElement writeToDirectory(Path directory) {
+		writeToProject(directory);
+		return this; // FIXME: Should return an element that represent the files written
+	}
+
 	/**
 	 * Writes the source files of this element to the given source directory.
 	 */

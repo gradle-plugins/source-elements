@@ -16,7 +16,11 @@
 
 package dev.gradleplugins.fixtures.sources;
 
+import java.nio.file.Path;
+
 public abstract class Element {
+	public abstract Element writeToDirectory(Path directory);
+
 	protected static SourceFile sourceFile(String path, String name, String content) {
 		return new SourceFile(path, name, content);
 	}
