@@ -67,22 +67,17 @@ public class SourceFileProcessor extends AbstractProcessor {
 		for (TypeElement annotation : annotations) {
 			Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
 
-			Set<SourceFileLocation> allResources = new LinkedHashSet<>();
 			for (Element element : annotatedElements) {
 				if (element.getKind().equals(ElementKind.INTERFACE) || element.getKind().equals(ElementKind.CLASS)) {
 					SourceFileLocation info = element.getAnnotation(SourceFileLocation.class);
-					allResources.add(info);
-//					if (element.getKind().equals(ElementKind.INTERFACE)) {
-//						generateClass((TypeElement) element);
-//					}
+					copySourceToResource(info, element);
 				}
 			}
-			allResources.forEach(it -> copySourceToResource(it));
 		}
 		return true;
 	}
 
-	private void copySourceToResource(SourceFileLocation info) {
+	private void copySourceToResource(SourceFileLocation info, Element element) {
 		String path = info.file();
 		String basePath = processingEnv.getOptions().get("basePath");
 		assert basePath != null;
@@ -107,7 +102,14 @@ public class SourceFileProcessor extends AbstractProcessor {
 					}
 				}
 
-				FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/templates/" + tokens[0] + "/" + tokens[tokens.length - 1]);
+				StringBuilder filename = new StringBuilder();
+				filename.append(element.getSimpleName());
+				Element ee = element;
+				while ((ee = ee.getEnclosingElement()) != null && ee instanceof TypeElement) {
+					filename.insert(0, ee.getSimpleName() + "$");
+				}
+
+				FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/templates/" + filename + "/" + tokens[tokens.length - 1]);
 				try (OutputStream os = resource.openOutputStream()) {
 					Files.copy(sourcePath, os);
 				}

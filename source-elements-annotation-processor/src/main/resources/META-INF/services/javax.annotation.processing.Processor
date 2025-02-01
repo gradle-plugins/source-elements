@@ -1,1 +1,2 @@
 dev.gradleplugins.sources.processor.SourceFileProcessor
+dev.gradleplugins.sources.processor.SourceProjectProcessor
