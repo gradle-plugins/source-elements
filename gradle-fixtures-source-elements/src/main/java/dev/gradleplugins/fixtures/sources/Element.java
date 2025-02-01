@@ -18,13 +18,36 @@ package dev.gradleplugins.fixtures.sources;
 
 import java.nio.file.Path;
 
+/**
+ * Represents an element that can be written to a directory.
+ */
 public abstract class Element {
+	/**
+	 * Write this element to the specified directory.
+	 * @param directory  the directory to write this element
+	 * @return the element as written
+	 */
 	public abstract Element writeToDirectory(Path directory);
 
+	/**
+	 * Creates a source file represented by the specified path, name and content.
+	 *
+	 * @param path  the path to the file (relative to the source set directory)
+	 * @param name  the name of the file
+	 * @param content  the file content
+	 * @return a new source file
+	 */
 	protected static SourceFile sourceFile(String path, String name, String content) {
 		return new SourceFile(path, name, content);
 	}
 
+	/**
+	 * Creates a source file represented by the specified source path and content.
+	 *
+	 * @param sourcePath  the file path (relative to the source set directory)
+	 * @param content  the file content
+	 * @return a new source file
+	 */
 	protected static SourceFile sourceFile(String sourcePath, String content) {
 		return SourceFile.of(sourcePath, content);
 	}
