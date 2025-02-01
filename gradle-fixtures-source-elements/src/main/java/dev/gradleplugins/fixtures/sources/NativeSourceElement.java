@@ -43,4 +43,13 @@ public abstract class NativeSourceElement extends SourceElement {
 		// TODO: Maybe a better implementation would be getHeaders().getFiles()
 		return getSourceFileNames().stream().filter(sourceFileName -> !sourceFileName.endsWith(".h")).collect(Collectors.toList());
 	}
+
+	public static NativeSourceElement ofSources(SourceElement sources) {
+		return new NativeSourceElement() {
+			@Override
+			public SourceElement getSources() {
+				return sources;
+			}
+		};
+	}
 }
