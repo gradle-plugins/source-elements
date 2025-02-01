@@ -23,6 +23,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static dev.gradleplugins.fixtures.sources.DelegatedElements.sourceSetNameOf;
+
 /**
  * Represent an element containing zero or more source files.
  */
@@ -182,14 +184,15 @@ public abstract class SourceElement extends Element {
 		return fromResource(type.getPackage().getName().replace('.', '/') + "/" + filename + ".xml");
 	}
 
-	public abstract static class FromResource extends SourceElement {
+	public abstract static class FromResource extends SourceElement implements ResourceElementEx {
 		private final SourceElement delegate;
 
 		protected FromResource() {
-			this.delegate = DelegatedElements.sourceOf(getClass());
-		}
-
-		protected FromResource(SourceElement delegate) {
+			SourceElement delegate = DelegatedElements.sourceOf(getClass());;
+			String sourceSetName = sourceSetNameOf(this, FromResource.class).orElse(null);
+			if (sourceSetName != null) {
+				delegate = delegate.withSourceSetName(sourceSetName);
+			}
 			this.delegate = delegate;
 		}
 

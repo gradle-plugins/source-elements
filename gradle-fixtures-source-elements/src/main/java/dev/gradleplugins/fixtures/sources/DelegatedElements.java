@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class DelegatedElements {
 	public static final class Filename {
@@ -115,41 +116,15 @@ public class DelegatedElements {
 		throw new UnsupportedOperationException();
 	}
 
-	public static SourceElement.ConvertOperation nativeFiles() {
-		return it -> {
-			List<SourceFile> publicHeaders = new ArrayList<>();
-			List<SourceFile> privateHeaders = new ArrayList<>();
-			List<SourceFile> sources = new ArrayList<>();
-			for (SourceFile file : it.getFiles()) {
-				if (file.getPath().startsWith("public")) {
-					publicHeaders.add(new SourceFile("headers" + file.getPath().substring("public".length()), file.getName(), file.getContent()));
-				} else if (file.getPath().startsWith("headers")) {
-					privateHeaders.add(file);
-				} else {
-					sources.add(file);
-				}
+	static Optional<String> sourceSetNameOf(SourceElement obj, Class<?> notOverride) {
+		try {
+			if (obj.getClass().getMethod("getSourceSetName").getDeclaringClass().equals(notOverride)) {
+				return Optional.empty(); // not overridden
+			} else {
+				return Optional.of(obj.getSourceSetName());
 			}
-			return new NativeLibraryElement() {
-				@Override
-				public SourceElement getPublicHeaders() {
-					return SourceElement.ofFiles(publicHeaders).withSourceSetName(getSourceSetName());
-				}
-
-				@Override
-				public SourceElement getPrivateHeaders() {
-					return SourceElement.ofFiles(privateHeaders).withSourceSetName(getSourceSetName());
-				}
-
-				@Override
-				public SourceElement getSources() {
-					return SourceElement.ofFiles(sources).withSourceSetName(getSourceSetName());
-				}
-
-				@Override
-				public String getSourceSetName() {
-					return it.getSourceSetName();
-				}
-			};
-		};
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

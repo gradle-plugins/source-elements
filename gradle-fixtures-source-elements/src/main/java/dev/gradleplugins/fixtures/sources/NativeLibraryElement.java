@@ -16,11 +16,12 @@
 
 package dev.gradleplugins.fixtures.sources;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import static dev.gradleplugins.fixtures.sources.DelegatedElements.nativeFiles;
+import static dev.gradleplugins.fixtures.sources.DelegatedElements.sourceSetNameOf;
 
 /**
  * Represents a native library with public/private headers and sources.
@@ -112,11 +113,47 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 		};
 	}
 
-	public abstract static class FromResource extends NativeLibraryElement {
+	public abstract static class FromResource extends NativeLibraryElement implements ResourceElementEx {
 		private final NativeLibraryElement delegate;
 
 		protected FromResource() {
-			this.delegate = (NativeLibraryElement) DelegatedElements.sourceOf(getClass()).as(nativeFiles());
+			NativeLibraryElement delegate = toNativeLibrary(DelegatedElements.sourceOf(getClass()));
+			String sourceSetName = sourceSetNameOf(this, FromResource.class).orElse(null);
+			if (sourceSetName != null) {
+				delegate = delegate.withSourceSetName(sourceSetName);
+			}
+			this.delegate = delegate;
+		}
+
+		private static NativeLibraryElement toNativeLibrary(SourceElement self) {
+			List<SourceFile> publicHeaders = new ArrayList<>();
+			List<SourceFile> privateHeaders = new ArrayList<>();
+			List<SourceFile> sources = new ArrayList<>();
+			for (SourceFile file : self.getFiles()) {
+				if (file.getPath().startsWith("public")) {
+					publicHeaders.add(new SourceFile("headers" + file.getPath().substring("public".length()), file.getName(), file.getContent()));
+				} else if (file.getPath().startsWith("headers")) {
+					privateHeaders.add(file);
+				} else {
+					sources.add(file);
+				}
+			}
+			return new NativeLibraryElement() {
+				@Override
+				public SourceElement getPrivateHeaders() {
+					return ofFiles(privateHeaders).withSourceSetName(self.getSourceSetName());
+				}
+
+				@Override
+				public SourceElement getPublicHeaders() {
+					return ofFiles(publicHeaders).withSourceSetName(self.getSourceSetName());
+				}
+
+				@Override
+				public SourceElement getSources() {
+					return ofFiles(sources).withSourceSetName(self.getSourceSetName());
+				}
+			};
 		}
 
 		/**
@@ -141,6 +178,14 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 		@Override
 		public final SourceElement getSources() {
 			return delegate.getSources();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final NativeLibraryElement withSourceSetName(String sourceSetName) {
+			return super.withSourceSetName(sourceSetName);
 		}
 
 		public NativeLibraryElement withSources(SourceElement sources) {

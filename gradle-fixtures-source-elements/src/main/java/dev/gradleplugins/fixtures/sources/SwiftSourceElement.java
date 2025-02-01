@@ -33,7 +33,7 @@ public abstract class SwiftSourceElement extends SourceElement {
 	/**
 	 * Represents a source element definition coming from XML resource.
 	 */
-    public abstract static class FromResource extends SwiftSourceElement {
+    public abstract static class FromResource extends SwiftSourceElement implements ResourceElementEx {
         private final SourceElement delegate;
 
         protected FromResource() {
@@ -44,12 +44,31 @@ public abstract class SwiftSourceElement extends SourceElement {
             this.delegate = delegate;
         }
 
+		/**
+		 * {@inheritDoc}
+		 */
         @Override
         public final List<SourceFile> getFiles() {
             return delegate.getFiles();
         }
 
-        @Override // allow override
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final SwiftSourceElement withImport(String moduleToImport) {
+			return super.withImport(moduleToImport);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final SourceElement withSourceSetName(String sourceSetName) {
+			return super.withSourceSetName(sourceSetName);
+		}
+
+		@Override // allow override
         public String getSourceSetName() {
             return delegate.getSourceSetName();
         }
