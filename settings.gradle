@@ -5,6 +5,7 @@ plugins {
 include 'gradle-fixtures-source-elements'
 include 'nokeetemplates-plugins'
 include 'source-elements-annotation-processor'
+include 'test-gradle-projects'
 
 gradle.allprojects {
 	repositories {
