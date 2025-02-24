@@ -36,6 +36,21 @@ public abstract class SourceFileElement extends SourceElement {
 		return Collections.singletonList(getSourceFile());
 	}
 
+	@Override
+	public SourceFileElement withSourceSetName(String sourceSetName) {
+		return new SourceFileElement() {
+			@Override
+			public SourceFile getSourceFile() {
+				return SourceFileElement.this.getSourceFile();
+			}
+
+			@Override
+			public String getSourceSetName() {
+				return sourceSetName;
+			}
+		};
+	}
+
 	/**
 	 * {@return a new source element for the specified source file}
 	 */
