@@ -117,7 +117,7 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 		private final NativeLibraryElement delegate;
 
 		protected FromResource() {
-			NativeLibraryElement delegate = toNativeLibrary(DelegatedElements.sourceOf(getClass()));
+			NativeLibraryElement delegate = toNativeLibrary(fromResource(getClass()));
 			String sourceSetName = sourceSetNameOf(this, FromResource.class).orElse(null);
 			if (sourceSetName != null) {
 				delegate = delegate.withSourceSetName(sourceSetName);

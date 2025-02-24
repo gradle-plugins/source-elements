@@ -27,6 +27,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -42,7 +43,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SourceProjectProcessor extends AbstractProcessor {
-
 	@Override
 	public Set<String> getSupportedAnnotationTypes() {
 		return Collections.singleton(SourceProject.class.getCanonicalName());
@@ -75,16 +75,30 @@ public class SourceProjectProcessor extends AbstractProcessor {
 		Path sourcePath = Paths.get(basePath, path);
 
 		assert Files.isDirectory(sourcePath);
-		List<dev.gradleplugins.fixtures.sources.Element> elements = copyDirToResource(sourcePath, info.excludes(), info.includes());
+		List<dev.gradleplugins.fixtures.sources.Element> elements = copyDirToResource(sourcePath, new ArrayList<PathMatcher>() {{
+			addAll(patternsOf(info.excludes()));
+			add(FileSystems.getDefault().getPathMatcher("glob:**/.DS_Store"));
+		}}, patternsOf(info.includes()));
+
+		elements = elements.stream().filter(it -> !((SourceElement) it).getFiles().isEmpty()).collect(Collectors.toList());
+		assert elements.size() == 1;
+		if (((SourceElement) elements.get(0)).getFiles().isEmpty()) {
+			throw new UnsupportedOperationException("no source files: " + element);
+		}
 
 		try {
 			StringBuilder filename = new StringBuilder();
 			filename.append(element.getSimpleName());
 			Element ee = element;
-			while ((ee = ee.getEnclosingElement()) != null && ee instanceof TypeElement) {
-				filename.insert(0, ee.getSimpleName() + "$");
+			while ((ee = ee.getEnclosingElement()) != null) {
+				if (ee instanceof TypeElement) {
+					filename.insert(0, ee.getSimpleName() + "$");
+				} else if (ee instanceof PackageElement) {
+					filename.insert(0, ((PackageElement) ee).getQualifiedName().toString().replace('.', '/') + "/");
+				}
 			}
-			FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/elements/" + filename + ".xml");
+
+			FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", filename + ".xml");
 			try (PrintWriter out = new PrintWriter(resource.openOutputStream())) {
 				assert !elements.isEmpty();
 				assert elements.size() == 1 : "assuming single source set, but we can definitely support more";
@@ -95,7 +109,6 @@ public class SourceProjectProcessor extends AbstractProcessor {
 				for (SourceFileProperty property : info.properties()) {
 					out.println("  <Property name=\"" + property.name() + "\" regex=\"" + StringEscapeUtils.escapeXml11(property.regex()) + "\"/>");
 				}
-
 
 				for (SourceFile sourceFile : e.getFiles()) {
 					for (SourceFileProperty property : info.properties()) {
@@ -122,12 +135,11 @@ public class SourceProjectProcessor extends AbstractProcessor {
         }
     }
 
-	private List<dev.gradleplugins.fixtures.sources.Element> copyDirToResource(Path sourcePath, String[] excludes, String[] includes) {
-		List<Pattern> excludePatterns = Arrays.stream(excludes).map(it -> it.replace(".", "\\.").replace("**", "{{dir}}").replace("*", "{{all}}").replace("{{dir}}", ".*").replace("{{all}}", "[^/]*")).map(it -> Pattern.compile(it, Pattern.DOTALL)).collect(Collectors.toList());
-		excludePatterns.add(Pattern.compile(".*/\\.DS_Store", Pattern.DOTALL));
+	private List<PathMatcher> patternsOf(String[] patterns) {
+		return Arrays.stream(patterns).map(it -> FileSystems.getDefault().getPathMatcher("glob:" + it)).collect(Collectors.toList());
+	}
 
-		List<Pattern> includePatterns = Arrays.stream(includes).map(it -> it.replace(".", "\\.").replace("**", "{{dir}}").replace("*", "{{all}}").replace("{{dir}}", ".*").replace("{{all}}", "[^/]*")).map(it -> Pattern.compile(it, Pattern.DOTALL)).collect(Collectors.toList());
-
+	private List<dev.gradleplugins.fixtures.sources.Element> copyDirToResource(Path sourcePath, List<PathMatcher> excludes, List<PathMatcher> includes) {
 		Path srcDir = sourcePath.resolve("src");
 		assert Files.isDirectory(srcDir);
 
@@ -138,16 +150,18 @@ public class SourceProjectProcessor extends AbstractProcessor {
 				Files.walkFileTree(sourceSetDir, new SimpleFileVisitor<Path>() {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						Path relativePath = sourceSetDir.relativize(file);
-						if (!includePatterns.isEmpty() && includePatterns.stream().noneMatch(it -> it.matcher("/" + relativePath).find())) {
+						Path relativePath = sourcePath.relativize(file);
+						if (!includes.isEmpty() && includes.stream().noneMatch(it -> {
+							return it.matches(relativePath);
+						})) {
 							return FileVisitResult.CONTINUE;
 						}
 
-						if (excludePatterns.stream().anyMatch(it -> it.matcher("/" + relativePath).find())) {
+						if (excludes.stream().anyMatch(it -> it.matches(relativePath))) {
 							return FileVisitResult.CONTINUE;
 						}
 
-						sourceFiles.add(SourceFile.from(relativePath, () -> new String(Files.readAllBytes(file))));
+						sourceFiles.add(SourceFile.from(sourceSetDir.relativize(file), () -> new String(Files.readAllBytes(file))));
 						return FileVisitResult.CONTINUE;
 					}
 				});

@@ -21,10 +21,8 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class NativeSourceElement extends SourceElement {
-	private final SourceElement delegate;
-
-	protected NativeSourceElement() {
-		this.delegate = SourceElement.ofElements(getHeaders().withSourceSetName(getSourceSetName()), getSources().withSourceSetName(getSourceSetName()));
+	private SourceElement delegate() {
+		return SourceElement.ofElements(getHeaders().withSourceSetName(getSourceSetName()), getSources().withSourceSetName(getSourceSetName()));
 	}
 
 	public SourceElement getHeaders() {
@@ -36,8 +34,8 @@ public abstract class NativeSourceElement extends SourceElement {
 	/**
 	 * {@inheritDoc}
 	 */
-	public List<SourceFile> getFiles() {
-		return delegate.getFiles();
+	public final List<SourceFile> getFiles() {
+		return delegate().getFiles();
 	}
 
 	/**
@@ -45,7 +43,7 @@ public abstract class NativeSourceElement extends SourceElement {
 	 */
 	@Override
 	public void writeToProject(Path projectDir) {
-		delegate.writeToProject(projectDir);
+		delegate().writeToProject(projectDir);
 	}
 
 	/**

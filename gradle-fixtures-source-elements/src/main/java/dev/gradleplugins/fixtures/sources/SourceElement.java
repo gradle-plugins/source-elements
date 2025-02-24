@@ -170,11 +170,10 @@ public abstract class SourceElement extends Element {
 	}
 
 	public static SourceElement fromResource(String resourcePath) {
-//		DelegatedElements.sourceOf()
-		throw new UnsupportedOperationException();
+		return DelegatedElements.sourceOf(resourcePath);
 	}
 
-	public static SourceElement fromResource(Class<? extends SourceElement> type) {
+	public static <T extends SourceElement & ResourceElementEx> SourceElement fromResource(Class<T> type) {
 		StringBuilder filename = new StringBuilder();
 		filename.append(type.getSimpleName());
 		Class<?> c = type;
@@ -188,7 +187,7 @@ public abstract class SourceElement extends Element {
 		private final SourceElement delegate;
 
 		protected FromResource() {
-			SourceElement delegate = DelegatedElements.sourceOf(getClass());;
+			SourceElement delegate = fromResource(getClass());
 			String sourceSetName = sourceSetNameOf(this, FromResource.class).orElse(null);
 			if (sourceSetName != null) {
 				delegate = delegate.withSourceSetName(sourceSetName);

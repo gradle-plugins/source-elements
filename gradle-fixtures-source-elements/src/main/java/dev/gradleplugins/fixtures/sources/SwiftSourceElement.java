@@ -37,7 +37,7 @@ public abstract class SwiftSourceElement extends SourceElement {
         private final SourceElement delegate;
 
         protected FromResource() {
-            this.delegate = DelegatedElements.sourceOf(getClass());
+            this.delegate = fromResource(getClass());
         }
 
         protected FromResource(SourceElement delegate) {
