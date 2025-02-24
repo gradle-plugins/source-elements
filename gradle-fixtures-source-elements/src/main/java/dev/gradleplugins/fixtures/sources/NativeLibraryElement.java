@@ -51,22 +51,24 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 	 * Returns a copy of this library with the public headers the 'public' headers directory.
 	 */
 	public NativeSourceElement asLib() {
-		return new NativeSourceElement() {
+		return new NativeLibraryElement() {
 			@Override
-			public SourceElement getHeaders() {
-				return SourceElement.ofElements(
-					NativeLibraryElement.this.getPrivateHeaders(),
-					withFiles(NativeLibraryElement.this.getPublicHeaders(), files -> {
-						return files.stream().map(sourceFile -> {
-							int idx = sourceFile.getPath().indexOf('/');
-							if (idx == -1) {
-								return new SourceFile("public", sourceFile.getName(), sourceFile.getContent());
-							} else {
-								return new SourceFile("public" + sourceFile.getPath().substring(idx), sourceFile.getName(), sourceFile.getContent());
-							}
-						}).collect(Collectors.toList());
-					})
-				);
+			public SourceElement getPublicHeaders() {
+				return withFiles(NativeLibraryElement.this.getPublicHeaders(), files -> {
+					return files.stream().map(sourceFile -> {
+						int idx = sourceFile.getPath().indexOf('/');
+						if (idx == -1) {
+							return new SourceFile("public", sourceFile.getName(), sourceFile.getContent());
+						} else {
+							return new SourceFile("public" + sourceFile.getPath().substring(idx), sourceFile.getName(), sourceFile.getContent());
+						}
+					}).collect(Collectors.toList());
+				});
+			}
+
+			@Override
+			public SourceElement getPrivateHeaders() {
+				return NativeLibraryElement.this.getPrivateHeaders();
 			}
 
 			private SourceElement withFiles(SourceElement self, UnaryOperator<List<SourceFile>> operation) {
