@@ -169,6 +169,11 @@ public abstract class SourceElement extends Element {
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		return "source element 'src/" + getSourceSetName() + "' with " + getFiles().size() + " source files";
+	}
+
 	public static SourceElement fromResource(String resourcePath) {
 		return DelegatedElements.sourceOf(resourcePath);
 	}
