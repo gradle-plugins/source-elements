@@ -1,11 +1,12 @@
 plugins {
 	id 'java-library'
+	id 'maven-publish'
 }
 
 description = 'Gradle fixtures'
 
 group = 'dev.gradleplugins'
-version = '1.0'
+version = '2.0-milestone-1'
 
 repositories {
 	mavenCentral()
@@ -25,6 +26,14 @@ testing {
 			dependencies {
 				implementation 'dev.nokee.commons:commons-hamcrest'
 			}
+		}
+	}
+}
+
+publishing {
+	publications {
+		java(MavenPublication) {
+			from components.java
 		}
 	}
 }
