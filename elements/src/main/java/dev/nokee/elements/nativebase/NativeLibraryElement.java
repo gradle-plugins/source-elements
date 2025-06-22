@@ -20,7 +20,6 @@ import dev.nokee.elements.core.SourceElement;
 
 import static dev.nokee.elements.core.SourceElement.empty;
 
-
 /**
  * Represents a native library with public/private headers and sources.
  */
@@ -152,18 +151,4 @@ public abstract class NativeLibraryElement extends NativeElement {
 			}
 		};
 	}
-
-//	public static NativeLibraryElement ofSources(SourceElement sources) {
-//		return new NativeLibraryElement() {
-//			@Override
-//			public SourceElement getSources() {
-//				return sources;
-//			}
-//
-//			@Override
-//			public SourceElement getPublicHeaders() {
-//				return empty();
-//			}
-//		};
-//	}
 }

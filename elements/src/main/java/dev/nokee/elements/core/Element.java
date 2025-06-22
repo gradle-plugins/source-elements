@@ -1,9 +1,6 @@
 package dev.nokee.elements.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Represents an logical source element.
@@ -24,12 +21,6 @@ public abstract class Element {
 	public interface Visitor {
 		void visit(Element element);
 	}
-//	public Element ofElements(Element... elements) {
-//		throw new UnsupportedOperationException();
-////		return new Element() {
-////			// TODO: Group elements
-////		};
-//	}
 
 	/**
 	 * Creates a source file represented by the specified source path and content.

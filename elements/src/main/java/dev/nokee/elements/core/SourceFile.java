@@ -79,11 +79,6 @@ public final class SourceFile {
 		return file;
 	}
 
-	// Essentially deprecated
-	public File writeToDirectory(File base) {
-		return writeToDirectory(base.toPath()).toFile();
-	}
-
 	public void writeToFile(Path file) {
 		try {
 			Files.createDirectories(file.getParent());
@@ -102,10 +97,6 @@ public final class SourceFile {
 		Path newPath = transformer.apply(Paths.get(path + "/" + name));
 		return new SourceFile(newPath.getParent().toString(), newPath.getFileName().toString(), content);
 	}
-
-//	public String withPath(String basePath) {
-//		return String.join("/", basePath, path, name);
-//	}
 
 	public SourceFile withContent(UnaryOperator<String> transformer) {
 		return new SourceFile(path, name, transformer.apply(content));
