@@ -60,6 +60,20 @@ public abstract class NativeSourceElement extends Element {
 
 	public abstract SourceElement getSources();
 
+	public NativeSourceElement withoutSources() {
+		return new NativeSourceElement() {
+			@Override
+			public SourceElement getHeaders() {
+				return NativeSourceElement.this.getHeaders();
+			}
+
+			@Override
+			public SourceElement getSources() {
+				return empty();
+			}
+		};
+	}
+
 	public static NativeSourceElement ofSources(SourceElement element) {
 		return new NativeSourceElement() {
 			@Override

@@ -93,6 +93,10 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 		return SourceElement.ofElements(getPublicHeaders(), getPrivateHeaders());
 	}
 
+	public NativeLibraryElement withoutSources() {
+		return withSources(empty());
+	}
+
 	public final NativeLibraryElement withSources(SourceElement sources) {
 		return new NativeLibraryElement() {
 			@Override

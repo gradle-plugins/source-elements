@@ -13,32 +13,40 @@ public interface NativeLibraryElementTester {
 
 	@Test
 	default void canConvertToImplementationElement() {
-		NativeSourceElement impl = subject().asImplementation();
-		assertThat(impl.getSources(), is(subject().getSources()));
-		assertThat(impl.getHeaders(), is(subject().getHeaders()));
+		NativeSourceElement newSubject = subject().asImplementation();
+		assertThat(newSubject.getSources(), is(subject().getSources()));
+		assertThat(newSubject.getHeaders(), is(subject().getHeaders()));
 	}
 
 	@Test
 	default void canRemovePublicHeaders() {
-		NativeLibraryElement library = subject().withoutPublicHeaders();
-		assertThat(library.getPublicHeaders().getFiles(), emptyIterable());
-		assertThat(library.getPrivateHeaders(), is(subject().getPrivateHeaders()));
-		assertThat(library.getSources(), is(subject().getSources()));
+		NativeLibraryElement newSubject = subject().withoutPublicHeaders();
+		assertThat(newSubject.getPublicHeaders().getFiles(), emptyIterable());
+		assertThat(newSubject.getPrivateHeaders(), is(subject().getPrivateHeaders()));
+		assertThat(newSubject.getSources(), is(subject().getSources()));
 	}
 
 	@Test
 	default void canRemovePrivateHeaders() {
-		NativeLibraryElement library = subject().withoutPrivateHeaders();
-		assertThat(library.getPublicHeaders(), is(subject().getPublicHeaders()));
-		assertThat(library.getPrivateHeaders().getFiles(), emptyIterable());
-		assertThat(library.getSources(), is(subject().getSources()));
+		NativeLibraryElement newSubject = subject().withoutPrivateHeaders();
+		assertThat(newSubject.getPublicHeaders(), is(subject().getPublicHeaders()));
+		assertThat(newSubject.getPrivateHeaders().getFiles(), emptyIterable());
+		assertThat(newSubject.getSources(), is(subject().getSources()));
 	}
 
 	@Test
 	default void canRemoveAllHeaders() {
-		NativeLibraryElement library = subject().withoutHeaders();
-		assertThat(library.getPublicHeaders().getFiles(), emptyIterable());
-		assertThat(library.getPrivateHeaders().getFiles(), emptyIterable());
-		assertThat(library.getSources(), is(subject().getSources()));
+		NativeLibraryElement newSubject = subject().withoutHeaders();
+		assertThat(newSubject.getPublicHeaders().getFiles(), emptyIterable());
+		assertThat(newSubject.getPrivateHeaders().getFiles(), emptyIterable());
+		assertThat(newSubject.getSources(), is(subject().getSources()));
+	}
+
+	@Test
+	default void canRemoveSources() {
+		NativeLibraryElement newSubject = subject().withoutSources();
+		assertThat(newSubject.getPublicHeaders(), is(subject().getPublicHeaders()));
+		assertThat(newSubject.getPrivateHeaders(), is(subject().getPrivateHeaders()));
+		assertThat(newSubject.getSources().getFiles(), emptyIterable());
 	}
 }
