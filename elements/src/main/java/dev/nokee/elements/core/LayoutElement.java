@@ -16,7 +16,7 @@ public abstract class LayoutElement implements WritableElement {
 	 */
 	// SHOULD return a FileSystemElement that represent this layout applied to the element to the specified directory
 	public void writeToDirectory(Path directory) {
-		visit(element, new Context(directory));
+		new Context(directory).visit(element);
 	}
 
 	protected abstract void visit(Element element, Context context);
@@ -26,7 +26,7 @@ public abstract class LayoutElement implements WritableElement {
 		file.writeToDirectory(context.location);
 	}
 
-	public static final class Context {
+	public final class Context {
 		private final Path location;
 
 		private Context(Path location) {
@@ -35,6 +35,14 @@ public abstract class LayoutElement implements WritableElement {
 
 		public Context dir(String path) {
 			return new Context(location.resolve(path));
+		}
+
+		public void visit(Element element) {
+			LayoutElement.this.visit(element, this);
+		}
+
+		public void visit(SourceFile sourceFile) {
+			LayoutElement.this.visit(sourceFile, this);
 		}
 	}
 }

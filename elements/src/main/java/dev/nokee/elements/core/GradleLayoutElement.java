@@ -15,24 +15,24 @@ public class GradleLayoutElement extends SimpleLayoutElement {
 	@Override
 	protected void visitWorkspace(WorkspaceElement element, Context context) {
 		for (ProjectElement project : element.getProjects()) {
-			visit(project, context.dir(projectPathOf(project)));
+			context.dir(projectPathOf(project)).visit(project);
 		}
 	}
 
 	protected void visitProject(ProjectElement element, Context context) {
-		visit(element.getMainElement(), context.dir("src/main"));
-		visit(element.getTestElement(), context.dir("src/test"));
+		context.dir("src/main").visit(element.getMainElement());
+		context.dir("src/test").visit(element.getTestElement());
 	}
 
 	protected void visitNative(NativeElement element, Context context) {
 		if (element instanceof NativeLibraryElement) {
-			visit(((NativeLibraryElement) element).getPublicHeaders(), context.dir("public"));
-			visit(((NativeLibraryElement) element).getPrivateHeaders(), context.dir("headers"));
+			context.dir("public").visit(((NativeLibraryElement) element).getPublicHeaders());
+			context.dir("headers").visit(((NativeLibraryElement) element).getPrivateHeaders());
 		} else {
-			visit(element.getHeaders(), context.dir("headers"));
+			context.dir("headers").visit(element.getHeaders());
 		}
 
-		visit(element.getSources(), context);
+		context.visit(element.getSources());
 	}
 
 	protected void visitSource(SourceElement element, Context context) {
@@ -49,7 +49,7 @@ public class GradleLayoutElement extends SimpleLayoutElement {
 		}
 
 		for (SourceFile source : element.getFiles()) {
-			visit(source, context);
+			context.visit(source);
 		}
 	}
 }
