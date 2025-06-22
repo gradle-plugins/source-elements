@@ -14,6 +14,10 @@ public abstract class ProjectElement extends Element {
 		this.identifier = identifier;
 	}
 
+	public final Object id() {
+		return identifier.toString();
+	}
+
 	public abstract Element getMainElement();
 
 	public Element getTestElement() {

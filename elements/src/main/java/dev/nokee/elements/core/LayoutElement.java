@@ -22,7 +22,7 @@ public abstract class LayoutElement implements WritableElement {
 	protected abstract void visit(Element element, Context context);
 
 	protected final void visit(SourceFile file, Context context) {
-		System.out.println("write to " + context.location);
+		System.out.println("==> " + context.location.resolve(file.getPath()).resolve(file.getName()));
 		file.writeToDirectory(context.location);
 	}
 

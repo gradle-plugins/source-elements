@@ -1,24 +1,22 @@
 package dev.nokee.elements.core;
 
+import dev.nokee.elements.nativebase.NativeElement;
 import dev.nokee.elements.nativebase.NativeLibraryElement;
-import dev.nokee.elements.nativebase.NativeSourceElement;
 
-public class GradleLayoutElement extends LayoutElement {
+public class GradleLayoutElement extends SimpleLayoutElement {
 	public GradleLayoutElement(Element element) {
 		super(element);
 	}
 
+	protected String projectPathOf(ProjectElement element) {
+		return element.id().toString();
+	}
+
 	@Override
-	protected void visit(Element e, Context context) {
-		e.accept(element -> {
-			if (element instanceof ProjectElement) {
-				visitProject((ProjectElement) element, context);
-			} else if (element instanceof NativeSourceElement) {
-				visitNativeSource((NativeSourceElement) element, context);
-			} else if (element instanceof SourceElement) {
-				visitSource((SourceElement) element, context);
-			}
-		});
+	protected void visitWorkspace(WorkspaceElement element, Context context) {
+		for (ProjectElement project : element.getProjects()) {
+			visit(project, context.dir(projectPathOf(project)));
+		}
 	}
 
 	protected void visitProject(ProjectElement element, Context context) {

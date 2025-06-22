@@ -19,6 +19,7 @@ testing {
 
 			dependencies {
 				implementation 'dev.nokee.commons:commons-hamcrest'
+				implementation 'org.apache.commons:commons-lang3:3.17.0'
 			}
 		}
 	}
