@@ -2,6 +2,7 @@ package dev.nokee.elements;
 
 import dev.nokee.elements.core.SourceElement;
 import dev.nokee.elements.core.SourceFile;
+import dev.nokee.elements.core.SourceFileElement;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -14,19 +15,21 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.emptyIterable;
 
 class SourceElementTests {
+	static SourceFile sourceFile = SourceFile.of("foo.cpp", "int foo() { return 42; }");
+
 	@Nested
 	class CustomElement {
 		SourceElement subject = new SourceElement() {
 			@Override
 			public List<SourceFile> getFiles() {
-				return Collections.singletonList(sourceFile("foo.cpp", "int foo() { return 42; }"));
+				return Collections.singletonList(sourceFile);
 			}
 		};
 	}
 
 	@Nested
 	class OfFilesFactory {
-		SourceElement subject = SourceElement.ofFiles(SourceFile.of("foo.cpp", "int foo() { return 42; }"));
+		SourceElement subject = SourceElement.ofFiles(sourceFile);
 
 		@Test
 		void hasSpecifiedSourceFiles() {
@@ -41,6 +44,31 @@ class SourceElementTests {
 		@Test
 		void hasNoSourceFiles() {
 			assertThat(subject.getFiles(), emptyIterable());
+		}
+	}
+
+	@Nested
+	class SingleFileElement {
+		SourceElement subject = new SourceFileElement() {
+			@Override
+			public SourceFile getSourceFile() {
+				return sourceFile;
+			}
+		};
+
+		@Test
+		void hasSpecifiedSourceFile() {
+			assertThat(subject.getFiles(), contains(named("foo.cpp")));
+		}
+	}
+
+	@Nested
+	class OfFileFactory {
+		SourceElement subject = SourceFileElement.ofFile(sourceFile);
+
+		@Test
+		void hasSpecifiedSourceFile() {
+			assertThat(subject.getFiles(), contains(named("foo.cpp")));
 		}
 	}
 }

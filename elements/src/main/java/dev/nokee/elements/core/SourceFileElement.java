@@ -19,4 +19,16 @@ public abstract class SourceFileElement extends SourceElement {
 	public List<SourceFile> getFiles() {
 		return Collections.singletonList(getSourceFile());
 	}
+
+	/**
+	 * {@return a new source element for the specified source file}
+	 */
+	public static SourceFileElement ofFile(SourceFile file) {
+		return new SourceFileElement() {
+			@Override
+			public SourceFile getSourceFile() {
+				return file;
+			}
+		};
+	}
 }
