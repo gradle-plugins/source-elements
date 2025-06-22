@@ -2,6 +2,7 @@ plugins {
 	id 'dev.gradleplugins.gradle-plugin-development' version '1.7.1'
 }
 
+include 'elements'
 include 'gradle-fixtures-source-elements'
 include 'nokeetemplates-plugins'
 include 'source-elements-annotation-processor'

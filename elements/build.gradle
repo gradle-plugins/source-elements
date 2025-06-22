@@ -1,0 +1,25 @@
+plugins {
+	id 'java-library'
+	id 'jvm-test-suite'
+}
+
+group = 'dev.gradleplugins'
+version = '2.0-milestone-1'
+
+testing {
+	suites {
+		test {
+			useJUnitJupiter('5.11.4')
+
+			targets.configureEach {
+				testTask.configure {
+					systemProperty 'junit.jupiter.tempdir.cleanup.mode.default', 'ON_SUCCESS'
+				}
+			}
+
+			dependencies {
+				implementation 'dev.nokee.commons:commons-hamcrest'
+			}
+		}
+	}
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SourceElement>
+  <SourceFile path="greeter_fixtures.h"><![CDATA[
+#define PASS 0
+#define FAIL -1
+
+  ]]></SourceFile>
+</SourceElement>

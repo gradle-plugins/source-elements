@@ -5,7 +5,12 @@ plugins {
 group = 'dev.gradleplugins'
 version = '1.0'
 
+java {
+	targetCompatibility = 11
+}
+
 dependencies {
+	implementation project(':elements')
 	implementation project(':gradle-fixtures-source-elements')
 	implementation 'org.apache.commons:commons-text:1.13.0'
 }
