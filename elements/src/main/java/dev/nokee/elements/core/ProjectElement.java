@@ -20,6 +20,20 @@ public abstract class ProjectElement extends Element {
 
 	public abstract Element getMainElement();
 
+	public final ProjectElement withMain(Element mainElement) {
+		return new ProjectElement(identifier) {
+			@Override
+			public Element getMainElement() {
+				return mainElement;
+			}
+
+			@Override
+			public Element getTestElement() {
+				return ProjectElement.this.getTestElement();
+			}
+		};
+	}
+
 	public Element getTestElement() {
 		return SourceElement.empty();
 	}
@@ -33,7 +47,21 @@ public abstract class ProjectElement extends Element {
 		};
 	}
 
-	public ProjectElement withTest(Element element) {
+	public static ProjectElement ofTest(Element testElement) {
+		return new ProjectElement() {
+			@Override
+			public Element getMainElement() {
+				return SourceElement.empty();
+			}
+
+			@Override
+			public Element getTestElement() {
+				return testElement;
+			}
+		};
+	}
+
+	public final ProjectElement withTest(Element element) {
 		return new ProjectElement(identifier) {
 			@Override
 			public Element getMainElement() {
