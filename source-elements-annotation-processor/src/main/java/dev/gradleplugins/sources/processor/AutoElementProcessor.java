@@ -232,7 +232,7 @@ public class AutoElementProcessor extends AbstractProcessor {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		return dev.nokee.elements.core.Element.ofFiles(sourceFiles);
+		return SourceElement.ofFiles(sourceFiles);
 	}
 
 	@Override
