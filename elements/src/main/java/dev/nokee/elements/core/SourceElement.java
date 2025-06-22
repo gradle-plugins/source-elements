@@ -1,11 +1,10 @@
 package dev.nokee.elements.core;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,54 +95,5 @@ public abstract class SourceElement extends Element implements WritableElement {
 		if (!(obj instanceof SourceElement)) return false;
 
 		return getFiles().equals(((SourceElement) obj).getFiles());
-	}
-
-	@Deprecated
-	public static SourceElement load(String resourcePath) {
-		InputStream inStream = Objects.requireNonNull(SourceElement.class.getClassLoader().getResourceAsStream("META-INF/elements/" + resourcePath + ".xml"));
-		try {
-			XMLStreamReader delegate = XML_FACTORY.createXMLStreamReader(inStream);
-			while (delegate.hasNext()) {
-				switch (delegate.next()) {
-					case XMLStreamReader.START_ELEMENT:
-						switch (delegate.getLocalName()) {
-							case "SourceElement":
-								return processSourceElement(delegate);
-						}
-						break;
-				}
-			}
-		} catch (XMLStreamException | RuntimeException e) {
-			throw new RuntimeException(String.format("error loading '%s'", resourcePath), e);
-		}
-		throw new UnsupportedOperationException();
-	}
-
-
-	private static final XMLInputFactory XML_FACTORY = XMLInputFactory.newFactory();
-
-	private static SourceElement processSourceElement(XMLStreamReader delegate) throws XMLStreamException {
-		List<SourceFile> sourceFiles = new ArrayList<>();
-		while (delegate.hasNext()) {
-			switch (delegate.next()) {
-				case XMLStreamReader.START_ELEMENT:
-					switch (delegate.getLocalName()) {
-						case "SourceFile":
-							// TODO: MERGE NAME AND PATH TOGETHER
-//							String name = delegate.getAttributeValue(null, "name");
-							String path = delegate.getAttributeValue(null, "path");
-							String content = delegate.getElementText();
-							sourceFiles.add(new SourceFile("", path, content));
-							break;
-					}
-				case XMLStreamReader.END_ELEMENT:
-					if (delegate.getLocalName().equals("SourceElement")) {
-						SourceElement result = SourceElement.ofFiles(sourceFiles);
-						return result;
-					}
-			}
-		}
-
-		throw new UnsupportedOperationException();
 	}
 }
