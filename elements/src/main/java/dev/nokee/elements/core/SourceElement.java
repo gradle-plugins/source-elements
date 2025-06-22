@@ -27,6 +27,9 @@ public abstract class SourceElement extends Element implements WritableElement {
 		}
 	}
 
+	/**
+	 * {@return empty source element.}
+	 */
 	public static SourceElement empty() {
 		return new SourceElement() {
 			@Override
