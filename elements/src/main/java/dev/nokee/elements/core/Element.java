@@ -41,4 +41,8 @@ public abstract class Element {
 	protected static SourceFile sourceFile(String sourcePath, String content) {
 		return SourceFile.of(sourcePath, content);
 	}
+
+	protected static SourceFile sourceFile(String sourcePath, String... lines) {
+		return SourceFile.of(sourcePath, String.join("\n", lines));
+	}
 }
