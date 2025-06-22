@@ -16,7 +16,7 @@ public abstract class SourceFileElement extends SourceElement {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<SourceFile> getFiles() {
+	public final List<SourceFile> getFiles() {
 		return Collections.singletonList(getSourceFile());
 	}
 

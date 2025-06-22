@@ -19,23 +19,27 @@ package dev.nokee.elements.nativebase;
 import dev.nokee.elements.core.SourceElement;
 
 import static dev.nokee.elements.core.SourceElement.empty;
-import static dev.nokee.elements.core.SourceElement.ofElements;
 
 
 /**
  * Represents a native library with public/private headers and sources.
  */
-public abstract class NativeLibraryElement extends NativeSourceElement {
+public abstract class NativeLibraryElement extends NativeElement {
+	//region public headers
 	/**
 	 * {@return the public headers of this library element}
 	 */
 	public abstract SourceElement getPublicHeaders();
 
-	public NativeLibraryElement withoutPublicHeaders() {
+	public final NativeLibraryElement withoutPublicHeaders() {
+		return withPublicHeaders(empty());
+	}
+
+	public final NativeLibraryElement withPublicHeaders(SourceElement headers) {
 		return new NativeLibraryElement() {
 			@Override
 			public SourceElement getPublicHeaders() {
-				return empty();
+				return headers;
 			}
 
 			@Override
@@ -49,9 +53,27 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 			}
 		};
 	}
+	//endregion
 
-	public NativeLibraryElement withoutPrivateHeaders() {
+	//region private headers
+	/**
+	 * {@return the private headers of this library element}
+	 */
+	public SourceElement getPrivateHeaders() {
+		return empty();
+	}
+
+	public final NativeLibraryElement withoutPrivateHeaders() {
+		return withPrivateHeaders(empty());
+	}
+
+	public final NativeLibraryElement withPrivateHeaders(SourceElement headers) {
 		return new NativeLibraryElement() {
+			@Override
+			public SourceElement getPrivateHeaders() {
+				return headers;
+			}
+
 			@Override
 			public SourceElement getPublicHeaders() {
 				return NativeLibraryElement.this.getPublicHeaders();
@@ -63,8 +85,21 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 			}
 		};
 	}
+	//endregion
 
-	public NativeLibraryElement withoutHeaders() {
+	//region headers
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final SourceElement getHeaders() {
+		return SourceElement.ofElements(getPublicHeaders(), getPrivateHeaders());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final NativeLibraryElement withoutHeaders() {
 		return new NativeLibraryElement() {
 			@Override
 			public SourceElement getPublicHeaders() {
@@ -77,23 +112,10 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 			}
 		};
 	}
+	//endregion
 
-	/**
-	 * {@return the private headers of this library element}
-	 */
-	public SourceElement getPrivateHeaders() {
-		return empty();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final SourceElement getHeaders() {
-		return SourceElement.ofElements(getPublicHeaders(), getPrivateHeaders());
-	}
-
-	public NativeLibraryElement withoutSources() {
+	//region sources
+	public final NativeLibraryElement withoutSources() {
 		return withSources(empty());
 	}
 
@@ -115,8 +137,9 @@ public abstract class NativeLibraryElement extends NativeSourceElement {
 			}
 		};
 	}
+	//endregion
 
-	public NativeSourceElement asImplementation() {
+	public NativeElement asImplementation() {
 		return new NativeSourceElement() {
 			@Override
 			public SourceElement getHeaders() {

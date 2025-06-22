@@ -1,19 +1,25 @@
 package dev.nokee.elements;
 
+import dev.nokee.elements.core.SourceElement;
+import dev.nokee.elements.core.SourceFile;
+import dev.nokee.elements.nativebase.NativeElement;
 import dev.nokee.elements.nativebase.NativeLibraryElement;
-import dev.nokee.elements.nativebase.NativeSourceElement;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+
+import static dev.nokee.commons.hamcrest.gradle.NamedMatcher.named;
+import static dev.nokee.elements.core.SourceFile.of;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public interface NativeLibraryElementTester {
 	NativeLibraryElement subject();
 
 	@Test
 	default void canConvertToImplementationElement() {
-		NativeSourceElement newSubject = subject().asImplementation();
+		NativeElement newSubject = subject().asImplementation();
 		assertThat(newSubject.getSources(), is(subject().getSources()));
 		assertThat(newSubject.getHeaders(), is(subject().getHeaders()));
 	}
@@ -48,5 +54,13 @@ public interface NativeLibraryElementTester {
 		assertThat(newSubject.getPublicHeaders(), is(subject().getPublicHeaders()));
 		assertThat(newSubject.getPrivateHeaders(), is(subject().getPrivateHeaders()));
 		assertThat(newSubject.getSources().getFiles(), emptyIterable());
+	}
+
+	@Test
+	default void canReplaceSources() {
+		NativeLibraryElement newSubject = subject().withSources(SourceElement.ofFiles(singletonList(of("my-other-source.cpp", "int foobar() { return 52; }"))));
+		assertThat(newSubject.getPublicHeaders(), is(subject().getPublicHeaders()));
+		assertThat(newSubject.getPrivateHeaders(), is(subject().getPrivateHeaders()));
+		assertThat(newSubject.getSources().getFiles(), contains(named("my-other-source.cpp")));
 	}
 }

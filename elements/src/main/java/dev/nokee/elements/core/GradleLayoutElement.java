@@ -26,7 +26,7 @@ public class GradleLayoutElement extends LayoutElement {
 		visit(element.getTestElement(), context.dir("src/test"));
 	}
 
-	protected void visitNativeSource(NativeSourceElement element, Context context) {
+	protected void visitNative(NativeElement element, Context context) {
 		if (element instanceof NativeLibraryElement) {
 			visit(((NativeLibraryElement) element).getPublicHeaders(), context.dir("public"));
 			visit(((NativeLibraryElement) element).getPrivateHeaders(), context.dir("headers"));

@@ -16,7 +16,6 @@
 
 package dev.nokee.elements.nativebase;
 
-import dev.nokee.elements.core.Element;
 import dev.nokee.elements.core.SourceElement;
 
 import java.util.Arrays;
@@ -25,21 +24,35 @@ import java.util.stream.Collectors;
 
 import static dev.nokee.elements.core.SourceElement.empty;
 
-public abstract class NativeSourceElement extends Element {
+public abstract class NativeSourceElement extends NativeElement {
+	//region headers
 	public SourceElement getHeaders() {
 		return empty();
 	}
 
-	public NativeSourceElement withoutHeaders() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public final NativeSourceElement withoutHeaders() {
+		return withHeaders(empty());
+	}
+
+	public final NativeSourceElement withHeaders(SourceElement headers) {
 		return new NativeSourceElement() {
+			@Override
+			public SourceElement getHeaders() {
+				return headers;
+			}
+
 			@Override
 			public SourceElement getSources() {
 				return NativeSourceElement.this.getSources();
 			}
 		};
 	}
+	//endregion
 
-	public NativeLibraryElement withPublicHeaders(SourceElement publicHeaders) {
+	public final NativeLibraryElement withPublicHeaders(SourceElement publicHeaders) {
 		return new NativeLibraryElement() {
 			@Override
 			public SourceElement getPublicHeaders() {
@@ -58,9 +71,9 @@ public abstract class NativeSourceElement extends Element {
 		};
 	}
 
-	public abstract SourceElement getSources();
-
-	public NativeSourceElement withoutSources() {
+	//region sources
+	@Override
+	public final NativeSourceElement withSources(SourceElement sources) {
 		return new NativeSourceElement() {
 			@Override
 			public SourceElement getHeaders() {
@@ -69,10 +82,16 @@ public abstract class NativeSourceElement extends Element {
 
 			@Override
 			public SourceElement getSources() {
-				return empty();
+				return sources;
 			}
 		};
 	}
+
+	@Override
+	public final NativeSourceElement withoutSources() {
+		return withSources(empty());
+	}
+	//endregion
 
 	public static NativeSourceElement ofSources(SourceElement element) {
 		return new NativeSourceElement() {
@@ -80,19 +99,14 @@ public abstract class NativeSourceElement extends Element {
 			public SourceElement getSources() {
 				return element;
 			}
-
-			@Override
-			public void accept(Visitor visitor) {
-				element.accept(visitor);
-			}
 		};
 	}
 
-	public static NativeLibraryElement ofElements(NativeSourceElement... elements) {
+	public static NativeLibraryElement ofElements(NativeElement... elements) {
 		return ofElements(Arrays.asList(elements));
 	}
 
-	public static NativeLibraryElement ofElements(List<NativeSourceElement> elements) {
+	public static NativeLibraryElement ofElements(List<NativeElement> elements) {
 		return new NativeLibraryElement() {
 			@Override
 			public SourceElement getPublicHeaders() {
@@ -111,7 +125,7 @@ public abstract class NativeSourceElement extends Element {
 			}
 
 			@Override
-			public NativeSourceElement asImplementation() {
+			public NativeElement asImplementation() {
 				return ofElements(elements.stream().map(it -> {
 					if (it instanceof NativeLibraryElement) {
 						return ((NativeLibraryElement) it).asImplementation();
@@ -128,15 +142,10 @@ public abstract class NativeSourceElement extends Element {
 
 			@Override
 			public void accept(Visitor visitor) {
-				for (NativeSourceElement element : elements) {
+				for (NativeElement element : elements) {
 					visitor.visit(element);
 				}
 			}
 		};
-	}
-
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
 	}
 }

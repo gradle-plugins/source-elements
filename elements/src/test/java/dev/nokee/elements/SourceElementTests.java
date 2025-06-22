@@ -1,14 +1,20 @@
 package dev.nokee.elements;
 
+import dev.nokee.commons.hamcrest.gradle.FileSystemMatchers;
 import dev.nokee.elements.core.SourceElement;
 import dev.nokee.elements.core.SourceFile;
 import dev.nokee.elements.core.SourceFileElement;
+import org.hamcrest.io.FileMatchers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.nokee.commons.hamcrest.gradle.FileSystemMatchers.anEmptyDirectory;
+import static dev.nokee.commons.hamcrest.gradle.FileSystemMatchers.hasRelativeDescendants;
 import static dev.nokee.commons.hamcrest.gradle.NamedMatcher.named;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -25,15 +31,27 @@ class SourceElementTests {
 				return Collections.singletonList(sourceFile);
 			}
 		};
+
+		@Test
+		void canWriteToDirectory(@TempDir Path testDirectory) {
+			subject.writeToDirectory(testDirectory);
+			assertThat(testDirectory, hasRelativeDescendants("foo.cpp"));
+		}
 	}
 
 	@Nested
 	class OfFilesFactory {
-		SourceElement subject = SourceElement.ofFiles(sourceFile);
+		SourceElement subject = SourceElement.ofFiles(Collections.singletonList(sourceFile));
 
 		@Test
 		void hasSpecifiedSourceFiles() {
 			assertThat(subject.getFiles(), contains(named("foo.cpp")));
+		}
+
+		@Test
+		void canWriteToDirectory(@TempDir Path testDirectory) {
+			subject.writeToDirectory(testDirectory);
+			assertThat(testDirectory, hasRelativeDescendants("foo.cpp"));
 		}
 	}
 
@@ -44,6 +62,12 @@ class SourceElementTests {
 		@Test
 		void hasNoSourceFiles() {
 			assertThat(subject.getFiles(), emptyIterable());
+		}
+
+		@Test
+		void canWriteToDirectory(@TempDir Path testDirectory) {
+			subject.writeToDirectory(testDirectory);
+			assertThat(testDirectory, anEmptyDirectory());
 		}
 	}
 
@@ -60,6 +84,12 @@ class SourceElementTests {
 		void hasSpecifiedSourceFile() {
 			assertThat(subject.getFiles(), contains(named("foo.cpp")));
 		}
+
+		@Test
+		void canWriteToDirectory(@TempDir Path testDirectory) {
+			subject.writeToDirectory(testDirectory);
+			assertThat(testDirectory, hasRelativeDescendants("foo.cpp"));
+		}
 	}
 
 	@Nested
@@ -69,6 +99,12 @@ class SourceElementTests {
 		@Test
 		void hasSpecifiedSourceFile() {
 			assertThat(subject.getFiles(), contains(named("foo.cpp")));
+		}
+
+		@Test
+		void canWriteToDirectory(@TempDir Path testDirectory) {
+			subject.writeToDirectory(testDirectory);
+			assertThat(testDirectory, hasRelativeDescendants("foo.cpp"));
 		}
 	}
 }

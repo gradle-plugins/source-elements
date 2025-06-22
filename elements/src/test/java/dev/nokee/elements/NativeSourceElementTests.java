@@ -2,7 +2,6 @@ package dev.nokee.elements;
 
 import dev.nokee.elements.core.SourceElement;
 import dev.nokee.elements.core.SourceFile;
-import dev.nokee.elements.nativebase.NativeLibraryElement;
 import dev.nokee.elements.nativebase.NativeSourceElement;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,10 +10,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static dev.nokee.commons.hamcrest.gradle.NamedMatcher.named;
-import static dev.nokee.elements.core.Element.ofFiles;
+import static dev.nokee.elements.ElementTestUtils.visited;
 import static dev.nokee.elements.nativebase.NativeSourceElement.ofSources;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.emptyIterable;
 
 class NativeSourceElementTests {
 	static SourceElement nonEmptySources = new SourceElement() {
@@ -44,6 +44,11 @@ class NativeSourceElementTests {
 		void hasSpecifiedSources() {
 			assertThat(subject.getSources().getFiles(), contains(named("main.cpp")));
 		}
+
+		@Test
+		void visitThisElement() {
+			assertThat(visited(subject), contains(subject));
+		}
 	}
 
 	@Nested
@@ -62,6 +67,11 @@ class NativeSourceElementTests {
 		@Test
 		void defaultToEmptyHeaders() {
 			assertThat(subject.getHeaders().getFiles(), emptyIterable());
+		}
+
+		@Test
+		void visitThisElement() {
+			assertThat(visited(subject), contains(subject));
 		}
 	}
 
@@ -82,6 +92,11 @@ class NativeSourceElementTests {
 		@Override
 		public NativeSourceElement subject() {
 			return subject;
+		}
+
+		@Test
+		void visitThisElement() {
+			assertThat(visited(subject), contains(subject));
 		}
 	}
 }
