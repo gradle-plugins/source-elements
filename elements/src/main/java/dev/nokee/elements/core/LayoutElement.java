@@ -3,20 +3,14 @@ package dev.nokee.elements.core;
 import java.nio.file.Path;
 
 // TODO: Maybe do not extends from Element as from this point forward, we are talking in terms of file on disk as opposed to some logical grouping of files
-public abstract class LayoutElement implements WritableElement {
-	private final Element element;
-
-	// TODO: Use something else then Element...
-	public LayoutElement(Element element) {
-		this.element = element;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	// SHOULD return a FileSystemElement that represent this layout applied to the element to the specified directory
-	public void writeToDirectory(Path directory) {
-		new Context(directory).visit(element);
+public abstract class LayoutElement {
+	public WritableElement applyTo(Element element) {
+		return new WritableElement() {
+			@Override
+			public void writeToDirectory(Path directory) {
+				new Context(directory).visit(element);
+			}
+		};
 	}
 
 	protected abstract void visit(Element element, Context context);

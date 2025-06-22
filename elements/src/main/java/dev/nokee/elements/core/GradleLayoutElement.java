@@ -4,10 +4,6 @@ import dev.nokee.elements.nativebase.NativeElement;
 import dev.nokee.elements.nativebase.NativeLibraryElement;
 
 public class GradleLayoutElement extends SimpleLayoutElement {
-	public GradleLayoutElement(Element element) {
-		super(element);
-	}
-
 	protected String projectPathOf(ProjectElement element) {
 		return element.id().toString();
 	}

@@ -3,10 +3,6 @@ package dev.nokee.elements.core;
 import dev.nokee.elements.nativebase.NativeElement;
 
 public abstract class SimpleLayoutElement extends LayoutElement {
-	protected SimpleLayoutElement(Element element) {
-		super(element);
-	}
-
 	@Override
 	protected final void visit(Element e, Context context) {
 		e.accept(element -> {

@@ -98,12 +98,12 @@ class LayoutTests {
 
 	@Test
 	void xcodeLayout(@TempDir Path testDirectory) {
-		new XcodeLayoutElement(workspace) {
+		new XcodeLayoutElement() {
 			@Override
 			protected String projectNameOf(ProjectElement element) {
 				return StringUtils.capitalize(element.id().toString());
 			}
-		}.writeToDirectory(testDirectory);
+		}.applyTo(workspace).writeToDirectory(testDirectory);
 
 		assertThat(testDirectory, hasRelativeDescendants(
 			"App/main.cpp",
@@ -118,12 +118,12 @@ class LayoutTests {
 
 	@Test
 	void traditionalNative(@TempDir Path testDirectory) {
-		new TraditionalNativeLayoutElement(workspace) {
+		new TraditionalNativeLayoutElement() {
 			@Override
 			protected String projectNameOf(ProjectElement element) {
 				return element.id().toString();
 			}
-		}.writeToDirectory(testDirectory);
+		}.applyTo(workspace).writeToDirectory(testDirectory);
 		assertThat(testDirectory, hasRelativeDescendants(
 			"src/app/main.cpp",
 			"src/app/bar.cpp",
@@ -137,7 +137,7 @@ class LayoutTests {
 
 	@Test
 	void standardGradle(@TempDir Path testDirectory) {
-		new GradleLayoutElement(workspace).writeToDirectory(testDirectory);
+		new GradleLayoutElement().applyTo(workspace).writeToDirectory(testDirectory);
 		assertThat(testDirectory, hasRelativeDescendants(
 			"app/src/main/cpp/main.cpp",
 			"app/src/main/cpp/bar.cpp",
@@ -150,10 +150,6 @@ class LayoutTests {
 	}
 
 	public abstract static class TraditionalNativeLayoutElement extends SimpleLayoutElement {
-		protected TraditionalNativeLayoutElement(Element element) {
-			super(element);
-		}
-
 		protected abstract String projectNameOf(ProjectElement element);
 
 		@Override
@@ -193,10 +189,6 @@ class LayoutTests {
 	}
 
 	public abstract static class XcodeLayoutElement extends SimpleLayoutElement {
-		public XcodeLayoutElement(Element element) {
-			super(element);
-		}
-
 		protected abstract String projectNameOf(ProjectElement element);
 
 		@Override
