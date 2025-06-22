@@ -36,17 +36,20 @@ public class GradleLayoutElement extends SimpleLayoutElement {
 	}
 
 	protected void visitSource(SourceElement element, Context context) {
-		for (SourceFile source : element.getFiles()) {
+		if (!element.getFiles().isEmpty()) {
 			// TODO: Use UTI instead
+			SourceFile source = element.getFiles().get(0);
 			if (source.getName().endsWith(".c")) {
-				visit(source, context.dir("c"));
+				context = context.dir("c");
 			} else if (source.getName().endsWith(".cpp")) {
-				visit(source, context.dir("cpp"));
+				context = context.dir("cpp");
 			} else if (source.getName().endsWith(".java")) {
-				visit(source, context.dir("java"));
-			} else {
-				visit(source, context);
+				context = context.dir("java");
 			}
+		}
+
+		for (SourceFile source : element.getFiles()) {
+			visit(source, context);
 		}
 	}
 }
