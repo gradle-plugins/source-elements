@@ -15,24 +15,8 @@ public abstract class Element {
 	 * @param sourceFiles  the source files of the element
 	 * @return a new source element containing the specified source files.
 	 */
-	public static SourceElement ofFiles(SourceFile... sourceFiles) {
-		return ofFiles(Arrays.asList(sourceFiles));
-	}
-
-	/**
-	 * Returns a source element that contains the given files.
-	 *
-	 * @param sourceFiles  the source files of the element
-	 * @return a new source element containing the specified source files.
-	 */
-	public static SourceElement ofFiles(List<SourceFile> sourceFiles) {
-		final List<SourceFile> files = Collections.unmodifiableList(new ArrayList<>(sourceFiles));
-		return new SourceElement() {
-			@Override
-			public List<SourceFile> getFiles() {
-				return files;
-			}
-		};
+	protected static SourceElement ofFiles(SourceFile... sourceFiles) {
+		return SourceElement.ofFiles(Arrays.asList(sourceFiles));
 	}
 
 	public abstract void accept(Visitor visitor);

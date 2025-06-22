@@ -61,6 +61,22 @@ public abstract class SourceElement extends Element implements WritableElement {
 		};
 	}
 
+	/**
+	 * Returns a source element that contains the given files.
+	 *
+	 * @param sourceFiles  the source files of the element
+	 * @return a new source element containing the specified source files.
+	 */
+	public static SourceElement ofFiles(List<SourceFile> sourceFiles) {
+		final List<SourceFile> files = Collections.unmodifiableList(new ArrayList<>(sourceFiles));
+		return new SourceElement() {
+			@Override
+			public List<SourceFile> getFiles() {
+				return files;
+			}
+		};
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
@@ -119,7 +135,7 @@ public abstract class SourceElement extends Element implements WritableElement {
 					}
 				case XMLStreamReader.END_ELEMENT:
 					if (delegate.getLocalName().equals("SourceElement")) {
-						SourceElement result = Element.ofFiles(sourceFiles);
+						SourceElement result = SourceElement.ofFiles(sourceFiles);
 						return result;
 					}
 			}
