@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,15 +25,15 @@ public abstract class IncrementalElement extends SourceElement {
 
 	@Override
 	public List<SourceFile> getFiles() {
-		return getIncrementalChanges().stream().flatMap(it -> it.getBeforeElement().getFiles().stream()).collect(Collectors.toList());
+		return getOriginalElement().getFiles();
 	}
 
 	public interface Transform {
 		void applyChangesTo(Path directory);
 
-		SourceElement getBeforeElement();
+		List<SourceFile> getBeforeFiles();
 
-		SourceElement getAfterElement();
+		List<SourceFile> getAfterFiles();
 	}
 
 	/**
@@ -44,13 +45,13 @@ public abstract class IncrementalElement extends SourceElement {
 			public void applyChangesTo(Path directory) {}
 
 			@Override
-			public SourceElement getBeforeElement() {
-				return element;
+			public List<SourceFile> getBeforeFiles() {
+				return element.getFiles();
 			}
 
 			@Override
-			public SourceElement getAfterElement() {
-				return element;
+			public List<SourceFile> getAfterFiles() {
+				return element.getFiles();
 			}
 		};
 	}
@@ -69,13 +70,13 @@ public abstract class IncrementalElement extends SourceElement {
 			}
 
 			@Override
-			public SourceElement getBeforeElement() {
-				return beforeElement;
+			public List<SourceFile> getBeforeFiles() {
+				return beforeElement.getFiles();
 			}
 
 			@Override
-			public SourceElement getAfterElement() {
-				return afterElement;
+			public List<SourceFile> getAfterFiles() {
+				return afterElement.getFiles();
 			}
 		};
 	}
@@ -106,8 +107,6 @@ public abstract class IncrementalElement extends SourceElement {
 	 * Returns a transform that delete the before element.
 	 */
 	protected static Transform delete(final SourceElement beforeElement) {
-//		final List<SourceFile> beforeFiles = beforeElement.getFiles();
-
 		return new Transform() {
 			@Override
 			public void applyChangesTo(Path directory) {
@@ -125,13 +124,13 @@ public abstract class IncrementalElement extends SourceElement {
 			}
 
 			@Override
-			public SourceElement getBeforeElement() {
-				return beforeElement;
+			public List<SourceFile> getBeforeFiles() {
+				return beforeElement.getFiles();
 			}
 
 			@Override
-			public SourceElement getAfterElement() {
-				return SourceElement.empty();
+			public List<SourceFile> getAfterFiles() {
+				return Collections.emptyList();
 			}
 		};
 	}
@@ -147,13 +146,13 @@ public abstract class IncrementalElement extends SourceElement {
 			}
 
 			@Override
-			public SourceElement getBeforeElement() {
-				return SourceElement.empty();
+			public List<SourceFile> getBeforeFiles() {
+				return Collections.emptyList();
 			}
 
 			@Override
-			public SourceElement getAfterElement() {
-				return afterElement;
+			public List<SourceFile> getAfterFiles() {
+				return afterElement.getFiles();
 			}
 		};
 	}
@@ -188,26 +187,22 @@ public abstract class IncrementalElement extends SourceElement {
 //		}
 
 		@Override
-		public SourceElement getBeforeElement() {
-			return beforeElement;
+		public List<SourceFile> getBeforeFiles() {
+			return beforeElement.getFiles();
 		}
 	}
 
-	public class OriginalElement extends Element {
+	public final class OriginalElement extends SourceElement {
 		@Override
-		public void accept(Visitor visitor) {
-			for (Transform transform : getIncrementalChanges()) {
-				transform.getBeforeElement().accept(visitor);
-			}
+		public List<SourceFile> getFiles() {
+			return getIncrementalChanges().stream().flatMap(it -> it.getBeforeFiles().stream()).collect(Collectors.toList());
 		}
 	}
 
-	public class AlternateElement extends Element {
+	public final class AlternateElement extends SourceElement {
 		@Override
-		public void accept(Visitor visitor) {
-			for (Transform transform : getIncrementalChanges()) {
-				transform.getAfterElement().accept(visitor);
-			}
+		public List<SourceFile> getFiles() {
+			return getIncrementalChanges().stream().flatMap(it -> it.getAfterFiles().stream()).collect(Collectors.toList());
 		}
 	}
 
@@ -225,7 +220,7 @@ public abstract class IncrementalElement extends SourceElement {
 						change.applyChangesTo(location);
 					}
 					// TODO: Would have to keep the identifier
-					return ofFiles(((IncrementalElement) element).getIncrementalChanges().stream().flatMap(it -> it.getAfterElement().getFiles().stream()).collect(Collectors.toList()));
+					return ((IncrementalElement) element).getAlternateElement();
 				}
 				return element;
 			}
