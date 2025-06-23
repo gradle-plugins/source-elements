@@ -18,8 +18,6 @@ package dev.nokee.elements.nativebase;
 
 import dev.nokee.elements.core.SourceElement;
 
-import static dev.nokee.elements.core.SourceElement.empty;
-
 /**
  * Represents a native library with public/private headers and sources.
  */
@@ -31,7 +29,7 @@ public abstract class NativeLibraryElement extends NativeElement {
 	public abstract SourceElement getPublicHeaders();
 
 	public final NativeLibraryElement withoutPublicHeaders() {
-		return withPublicHeaders(empty());
+		return withPublicHeaders(SourceElement.empty());
 	}
 
 	public final NativeLibraryElement withPublicHeaders(SourceElement headers) {
@@ -59,11 +57,11 @@ public abstract class NativeLibraryElement extends NativeElement {
 	 * {@return the private headers of this library element}
 	 */
 	public SourceElement getPrivateHeaders() {
-		return empty();
+		return SourceElement.empty();
 	}
 
 	public final NativeLibraryElement withoutPrivateHeaders() {
-		return withPrivateHeaders(empty());
+		return withPrivateHeaders(SourceElement.empty());
 	}
 
 	public final NativeLibraryElement withPrivateHeaders(SourceElement headers) {
@@ -102,7 +100,7 @@ public abstract class NativeLibraryElement extends NativeElement {
 		return new NativeLibraryElement() {
 			@Override
 			public SourceElement getPublicHeaders() {
-				return empty();
+				return SourceElement.empty();
 			}
 
 			@Override
@@ -115,7 +113,7 @@ public abstract class NativeLibraryElement extends NativeElement {
 
 	//region sources
 	public final NativeLibraryElement withoutSources() {
-		return withSources(empty());
+		return withSources(SourceElement.empty());
 	}
 
 	public final NativeLibraryElement withSources(SourceElement sources) {
@@ -148,6 +146,20 @@ public abstract class NativeLibraryElement extends NativeElement {
 			@Override
 			public SourceElement getSources() {
 				return NativeLibraryElement.this.getSources();
+			}
+		};
+	}
+
+	public static NativeLibraryElement empty() {
+		return new NativeLibraryElement() {
+			@Override
+			public SourceElement getPublicHeaders() {
+				return SourceElement.empty();
+			}
+
+			@Override
+			public SourceElement getSources() {
+				return SourceElement.empty();
 			}
 		};
 	}

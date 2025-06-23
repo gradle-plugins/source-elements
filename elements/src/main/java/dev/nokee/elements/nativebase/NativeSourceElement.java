@@ -22,19 +22,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static dev.nokee.elements.core.SourceElement.empty;
-
 public abstract class NativeSourceElement extends NativeElement {
 	//region headers
 	public SourceElement getHeaders() {
-		return empty();
+		return SourceElement.empty();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public final NativeSourceElement withoutHeaders() {
-		return withHeaders(empty());
+		return withHeaders(SourceElement.empty());
 	}
 
 	public final NativeSourceElement withHeaders(SourceElement headers) {
@@ -89,9 +87,18 @@ public abstract class NativeSourceElement extends NativeElement {
 
 	@Override
 	public final NativeSourceElement withoutSources() {
-		return withSources(empty());
+		return withSources(SourceElement.empty());
 	}
 	//endregion
+
+	public static NativeSourceElement empty() {
+		return new NativeSourceElement() {
+			@Override
+			public SourceElement getSources() {
+				return SourceElement.empty();
+			}
+		};
+	}
 
 	public static NativeSourceElement ofSources(SourceElement element) {
 		return new NativeSourceElement() {
@@ -143,7 +150,7 @@ public abstract class NativeSourceElement extends NativeElement {
 			@Override
 			public void accept(Visitor visitor) {
 				for (NativeElement element : elements) {
-					visitor.visit(element);
+					element.accept(visitor);
 				}
 			}
 		};

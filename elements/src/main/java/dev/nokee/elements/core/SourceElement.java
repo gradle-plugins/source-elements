@@ -2,10 +2,7 @@ package dev.nokee.elements.core;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,12 +38,7 @@ public abstract class SourceElement extends Element implements WritableElement {
 	}
 
 	public static SourceElement ofElements(SourceElement... elements) {
-		return new SourceElement() {
-			@Override
-			public List<SourceFile> getFiles() {
-				return Stream.of(elements).flatMap(it -> it.getFiles().stream()).collect(Collectors.toList());
-			}
-		};
+		return ofElements(Arrays.asList(elements));
 	}
 
 	public static SourceElement ofElements(List<SourceElement> elements) {
@@ -59,7 +51,7 @@ public abstract class SourceElement extends Element implements WritableElement {
 			@Override
 			public void accept(Visitor visitor) {
 				for (SourceElement element : elements) {
-					visitor.visit(element);
+					element.accept(visitor);
 				}
 			}
 		};

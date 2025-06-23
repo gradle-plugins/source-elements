@@ -44,8 +44,6 @@ public class GradleLayoutElement extends SimpleLayoutElement {
 			}
 		}
 
-		for (SourceFile source : element.getFiles()) {
-			context.visit(source);
-		}
+		context.visitSources(element);
 	}
 }

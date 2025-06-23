@@ -182,9 +182,7 @@ class LayoutTests {
 
 		@Override
 		protected void visitSource(SourceElement element, Context context) {
-			for (SourceFile file : element.getFiles()) {
-				context.visit(file);
-			}
+			context.visitSources(element);
 		}
 	}
 
@@ -212,9 +210,7 @@ class LayoutTests {
 
 		@Override
 		protected void visitSource(SourceElement element, Context context) {
-			for (SourceFile file : element.getFiles()) {
-				context.visit(file);
-			}
+			context.visitSources(element);
 		}
 	}
 }
