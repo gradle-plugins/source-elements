@@ -7,15 +7,10 @@ import java.util.List;
 
 // TODO: Maybe do not extends from Element as from this point forward, we are talking in terms of file on disk as opposed to some logical grouping of files
 public abstract class LayoutElement {
-	public WritableElement applyTo(Element element) {
-		return new WritableElement() {
-			@Override
-			public FileSystemElement writeToDirectory(Path directory) {
-				Context context = new Context();
-				context.visit(element);
-				return new FileSystemElement(Paths.get(""), context.allFiles).writeToDirectory(directory);
-			}
-		};
+	public FileSystemElement applyTo(Element element) {
+		Context context = new Context();
+		context.visit(element);
+		return new FileSystemElement(Paths.get(""), context.allFiles);
 	}
 
 	protected abstract void visit(Element element, Context context);
