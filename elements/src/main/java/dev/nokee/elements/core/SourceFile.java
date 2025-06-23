@@ -68,6 +68,10 @@ public final class SourceFile {
 		return new SourceFile(path, name, content);
 	}
 
+	public SourceFile withName(UnaryOperator<String> transformer) {
+		return new SourceFile(path, transformer.apply(name), content);
+	}
+
 	public String getContent() {
 		return content;
 	}

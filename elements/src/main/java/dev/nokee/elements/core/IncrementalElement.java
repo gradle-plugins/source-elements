@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public abstract class IncrementalElement extends SourceElement {
@@ -111,12 +112,13 @@ public abstract class IncrementalElement extends SourceElement {
 			@Override
 			public void applyChangesTo(Path directory) {
 				for (SourceFile file : beforeElement.getFiles()) {
-					if (!Files.exists(directory.resolve(file.getPath()).resolve(file.getName()))) {
+					Path path = directory.resolve(file.getPath()).resolve(file.getName());
+					if (!Files.exists(path)) {
 						throw new IllegalStateException();
 					}
 
 					try {
-						Files.delete(directory.resolve(file.getPath()).resolve(file.getName()));
+						Files.delete(path);
 					} catch (IOException e) {
 						throw new UncheckedIOException(e);
 					}
@@ -162,34 +164,40 @@ public abstract class IncrementalElement extends SourceElement {
 	}
 
 	/**
-	 * Generic transform class that rename the source of the before element.
+	 * Returns a transform that rename the before element to {@code renamed-} followed by the original name.
 	 */
-	protected static abstract class AbstractRenameTransform implements Transform {
-		public static final String DEFAULT_RENAME_PREFIX = "renamed-";
-		private final SourceFile sourceFile;
-		private final SourceFile destinationFile;
-		private final SourceElement beforeElement;
+	protected static Transform rename(SourceElement beforeElement) {
+		return rename(beforeElement, name -> "renamed-" + name);
+	}
 
-		AbstractRenameTransform(SourceFile sourceFile, SourceFile destinationFile, SourceElement beforeElement) {
-			this.sourceFile = sourceFile;
-			this.destinationFile = destinationFile;
-			this.beforeElement = beforeElement;
-		}
+	protected static Transform rename(SourceElement beforeElement, UnaryOperator<String> renameOperation) {
+		return new Transform() {
+			@Override
+			public void applyChangesTo(Path directory) {
+				for (SourceFile file : beforeElement.getFiles()) {
+					Path path = directory.resolve(file.getPath()).resolve(file.getName());
+					if (!Files.exists(path)) {
+						throw new IllegalStateException();
+					}
 
-//		@Override
-//		public void applyChangesToProject(TestFile projectDir) {
-//			String sourceSetName = beforeElement.getSourceSetName();
-//			TestFile file = projectDir.file(sourceFile.withPath("src/" + sourceSetName));
-//
-//			file.assertExists();
-//
-//			file.renameTo(projectDir.file(destinationFile.withPath("src/" + sourceSetName)));
-//		}
+					try {
+						Files.move(path, path.getParent().resolve(renameOperation.apply(file.getName())));
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+				}
+			}
 
-		@Override
-		public List<SourceFile> getBeforeFiles() {
-			return beforeElement.getFiles();
-		}
+			@Override
+			public List<SourceFile> getBeforeFiles() {
+				return beforeElement.getFiles();
+			}
+
+			@Override
+			public List<SourceFile> getAfterFiles() {
+				return beforeElement.getFiles().stream().map(it -> it.withName(renameOperation)).collect(Collectors.toList());
+			}
+		};
 	}
 
 	public final class OriginalElement extends SourceElement {

@@ -24,7 +24,7 @@ class IncrementalElementTests {
 		IncrementalElement subject = new IncrementalElement() {
 			@Override
 			protected List<Transform> getIncrementalChanges() {
-				return Collections.singletonList(modify(ofFile(sourceFile("foo.h", "int foo() { return 42 }")), ofFile(sourceFile("foo.h", "int foo() { return 42; }"))));
+				return Collections.singletonList(modify(ofFile(sourceFile("foo.cpp", "int foo() { return 42 }")), ofFile(sourceFile("foo.cpp", "int foo() { return 42; }"))));
 			}
 		};
 
@@ -32,23 +32,23 @@ class IncrementalElementTests {
 		void canWriteAsSourceElement(@TempDir Path testDirectory) {
 			subject.writeToDirectory(testDirectory);
 
-			assertThat(testDirectory.resolve("foo.h"), aFile(withTextContent(not(containsString(";")))));
+			assertThat(testDirectory.resolve("foo.cpp"), aFile(withTextContent(not(containsString(";")))));
 		}
 
 		@Test
 		void canApplyIncrementalChangeSourceElement(@TempDir Path testDirectory) {
 			subject.writeToDirectory(testDirectory).apply(allChanges());
 
-			assertThat(testDirectory.resolve("foo.h"), aFile(withTextContent(containsString(";"))));
+			assertThat(testDirectory.resolve("foo.cpp"), aFile(withTextContent(containsString(";"))));
 		}
 
 		@Test
 		void modifiedFileSystemElementCanBeRewrittenToAnotherLocation(@TempDir Path testDirectory) {
 			FileSystemElement element = subject.writeToDirectory(testDirectory.resolve("first")).apply(allChanges());
-			assertThat(testDirectory.resolve("first").resolve("foo.h"), aFile(withTextContent(containsString(";"))));
+			assertThat(testDirectory.resolve("first").resolve("foo.cpp"), aFile(withTextContent(containsString(";"))));
 
 			element.writeToDirectory(testDirectory.resolve("second"));
-			assertThat(testDirectory.resolve("second").resolve("foo.h"), aFile(withTextContent(containsString(";"))));
+			assertThat(testDirectory.resolve("second").resolve("foo.cpp"), aFile(withTextContent(containsString(";"))));
 		}
 	}
 
@@ -57,7 +57,7 @@ class IncrementalElementTests {
 		IncrementalElement subject = new IncrementalElement() {
 			@Override
 			protected List<Transform> getIncrementalChanges() {
-				return Collections.singletonList(add(ofFile(sourceFile("foo.h", "int foo() { return 42; }"))));
+				return Collections.singletonList(add(ofFile(sourceFile("foo.cpp", "int foo() { return 42; }"))));
 			}
 		};
 
@@ -65,23 +65,23 @@ class IncrementalElementTests {
 		void canWriteAsSourceElement(@TempDir Path testDirectory) {
 			subject.writeToDirectory(testDirectory);
 
-			assertThat(testDirectory.resolve("foo.h"), not(anExistingFile()));
+			assertThat(testDirectory.resolve("foo.cpp"), not(anExistingFile()));
 		}
 
 		@Test
 		void canApplyIncrementalChangeSourceElement(@TempDir Path testDirectory) {
 			subject.writeToDirectory(testDirectory).apply(allChanges());
 
-			assertThat(testDirectory.resolve("foo.h"), anExistingFile());
+			assertThat(testDirectory.resolve("foo.cpp"), anExistingFile());
 		}
 
 		@Test
 		void modifiedFileSystemElementCanBeRewrittenToAnotherLocation(@TempDir Path testDirectory) {
 			FileSystemElement element = subject.writeToDirectory(testDirectory.resolve("first")).apply(allChanges());
-			assertThat(testDirectory.resolve("first").resolve("foo.h"), anExistingFile());
+			assertThat(testDirectory.resolve("first").resolve("foo.cpp"), anExistingFile());
 
 			element.writeToDirectory(testDirectory.resolve("second"));
-			assertThat(testDirectory.resolve("second").resolve("foo.h"), anExistingFile());
+			assertThat(testDirectory.resolve("second").resolve("foo.cpp"), anExistingFile());
 		}
 	}
 
@@ -90,7 +90,7 @@ class IncrementalElementTests {
 		IncrementalElement subject = new IncrementalElement() {
 			@Override
 			protected List<Transform> getIncrementalChanges() {
-				return Collections.singletonList(delete(ofFile(sourceFile("foo.h", "int foo() { return 42; }"))));
+				return Collections.singletonList(delete(ofFile(sourceFile("foo.cpp", "int foo() { return 42; }"))));
 			}
 		};
 
@@ -98,23 +98,56 @@ class IncrementalElementTests {
 		void canWriteAsSourceElement(@TempDir Path testDirectory) {
 			subject.writeToDirectory(testDirectory);
 
-			assertThat(testDirectory.resolve("foo.h"), anExistingFile());
+			assertThat(testDirectory.resolve("foo.cpp"), anExistingFile());
 		}
 
 		@Test
 		void canApplyIncrementalChangeSourceElement(@TempDir Path testDirectory) {
 			subject.writeToDirectory(testDirectory).apply(allChanges());
 
-			assertThat(testDirectory.resolve("foo.h"), not(anExistingFile()));
+			assertThat(testDirectory.resolve("foo.cpp"), not(anExistingFile()));
 		}
 
 		@Test
 		void modifiedFileSystemElementCanBeRewrittenToAnotherLocation(@TempDir Path testDirectory) {
 			FileSystemElement element = subject.writeToDirectory(testDirectory.resolve("first")).apply(allChanges());
-			assertThat(testDirectory.resolve("first").resolve("foo.h"), not(anExistingFile()));
+			assertThat(testDirectory.resolve("first").resolve("foo.cpp"), not(anExistingFile()));
 
 			element.writeToDirectory(testDirectory.resolve("second"));
-			assertThat(testDirectory.resolve("second").resolve("foo.h"), not(anExistingFile()));
+			assertThat(testDirectory.resolve("second").resolve("foo.cpp"), not(anExistingFile()));
+		}
+	}
+
+	@Nested
+	class RenameIncrementalTest {
+		IncrementalElement subject = new IncrementalElement() {
+			@Override
+			protected List<Transform> getIncrementalChanges() {
+				return Collections.singletonList(rename(ofFile(sourceFile("foo.cpp", "int foo() { return 42; }"))));
+			}
+		};
+
+		@Test
+		void canWriteAsSourceElement(@TempDir Path testDirectory) {
+			subject.writeToDirectory(testDirectory);
+
+			assertThat(testDirectory, hasRelativeDescendants("foo.cpp"));
+		}
+
+		@Test
+		void canApplyIncrementalChangeSourceElement(@TempDir Path testDirectory) {
+			subject.writeToDirectory(testDirectory).apply(allChanges());
+
+			assertThat(testDirectory, hasRelativeDescendants("renamed-foo.cpp"));
+		}
+
+		@Test
+		void modifiedFileSystemElementCanBeRewrittenToAnotherLocation(@TempDir Path testDirectory) {
+			FileSystemElement element = subject.writeToDirectory(testDirectory.resolve("first")).apply(allChanges());
+			assertThat(testDirectory.resolve("first"), hasRelativeDescendants("renamed-foo.cpp"));
+
+			element.writeToDirectory(testDirectory.resolve("second"));
+			assertThat(testDirectory.resolve("second"), hasRelativeDescendants("renamed-foo.cpp"));
 		}
 	}
 
