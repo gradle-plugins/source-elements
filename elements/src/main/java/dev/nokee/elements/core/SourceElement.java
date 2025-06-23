@@ -12,6 +12,9 @@ import java.util.stream.Stream;
 /**
  * Represent an element containing zero or more source files.
  */
+// TODO: Maybe this should extends from FileSystemElement
+//   this could means we could do IncrementalElement.apply(allChanges()).writeToDirectory(...)
+//   IncrementalElement should probably have a shortcut IncrementalElement.applyAllChanges()
 public abstract class SourceElement extends Element implements WritableElement {
 	/**
 	 * {@return the source files associated with this element, possibly none.}
@@ -22,7 +25,7 @@ public abstract class SourceElement extends Element implements WritableElement {
 	 * {@inheritDoc}
 	 */
 	public final FileSystemElement writeToDirectory(Path directory) {
-		return new FileSystemElement(Paths.get(""), getFiles()).writeToDirectory(directory);
+		return new FileSystemElement(Paths.get(""), this).writeToDirectory(directory);
 	}
 
 	/**

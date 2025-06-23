@@ -1,27 +1,26 @@
 package dev.nokee.elements.core;
 
 import java.nio.file.Path;
-import java.util.List;
 
 public class FileSystemElement extends Element implements WritableElement {
 	private final Path location;
-	private final List<SourceFile> files;
+	private final SourceElement sources;
 
-	public FileSystemElement(Path location, List<SourceFile> files) {
+	public FileSystemElement(Path location, SourceElement sources) {
 		this.location = location;
-		this.files = files;
+		this.sources = sources;
 	}
 
 	@Override
 	public FileSystemElement writeToDirectory(Path directory) {
-		for (SourceFile file : files) {
+		for (SourceFile file : sources.getFiles()) {
 			file.writeToDirectory(directory);
 		}
-		return new FileSystemElement(directory, files);
+		return new FileSystemElement(directory, sources);
 	}
 
-	public FileSystemElement apply(Object transform) {
-		throw new UnsupportedOperationException();
+	public FileSystemElement apply(IncrementalElement.ChangeVisitor transform) {
+		return new FileSystemElement(location, transform.visit(location, sources));
 	}
 
 	@Override

@@ -5,12 +5,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dev.nokee.elements.core.SourceElement.ofFiles;
+
 // TODO: Maybe do not extends from Element as from this point forward, we are talking in terms of file on disk as opposed to some logical grouping of files
 public abstract class LayoutElement {
 	public FileSystemElement applyTo(Element element) {
 		Context context = new Context();
 		context.visit(element);
-		return new FileSystemElement(Paths.get(""), context.allFiles);
+		return new FileSystemElement(Paths.get(""), ofFiles(context.allFiles));
 	}
 
 	protected abstract void visit(Element element, Context context);
