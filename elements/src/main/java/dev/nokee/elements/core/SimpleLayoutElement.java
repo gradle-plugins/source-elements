@@ -2,6 +2,7 @@ package dev.nokee.elements.core;
 
 import dev.nokee.elements.nativebase.NativeElement;
 
+// TODO: Not sure if this should be folded into LayoutElement directly
 public abstract class SimpleLayoutElement extends LayoutElement {
 	@Override
 	protected final void visit(Element e, Context context) {

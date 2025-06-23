@@ -14,10 +14,14 @@ public abstract class ProjectElement extends Element {
 		this.identifier = identifier;
 	}
 
+	// Identifier for layout mapping
 	public final Object id() {
 		return identifier.toString();
 	}
 
+	/**
+	 * {@return the main element of this project.}
+	 */
 	public abstract Element getMainElement();
 
 	public final ProjectElement withMain(Element mainElement) {
@@ -34,10 +38,19 @@ public abstract class ProjectElement extends Element {
 		};
 	}
 
+	/**
+	 * {@return the test element of this project}
+	 */
 	public Element getTestElement() {
 		return SourceElement.empty();
 	}
 
+	/**
+	 * Creates a project element with only the specified main element.
+	 *
+	 * @param mainElement  the main element of this project.
+	 * @return a project element
+	 */
 	public static ProjectElement ofMain(Element mainElement) {
 		return new ProjectElement() {
 			@Override

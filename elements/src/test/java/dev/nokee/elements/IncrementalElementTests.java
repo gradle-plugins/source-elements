@@ -189,32 +189,37 @@ class IncrementalElementTests {
 
 	@Nested
 	class GenericTransform {
-		IncrementalElement subject = IncrementalElement.transform(
-			new SourceElement() {
-				@Override
-				public List<SourceFile> getFiles() {
-					return Arrays.asList(
-						sourceFile("a.cpp", "void a() {}"),
-						sourceFile("b.cpp", "void b() {}"),
-						sourceFile("c.cpp", "void c() {}"),
-						sourceFile("d.cpp", "void d() {}"),
-						sourceFile("e.cpp", "void e() {}")
-					);
-				}
-			},
-			new SourceElement() {
-				@Override
-				public List<SourceFile> getFiles() {
-					return Arrays.asList(
-						sourceFile("a.cpp", "void a() {}"), // preseved
-						sourceFile("renamed-b.cpp", "void b() {}"), //renamed
-						// c.cpp is removed
-						sourceFile("dir/d.cpp", "void d() {}"), // moved
-						sourceFile("e.cpp", "int e() { return 42; }") // modified
-					);
-				}
+		IncrementalElement subject = new IncrementalElement() {
+			@Override
+			protected List<Transform> getIncrementalChanges() {
+				return Collections.singletonList(replace(
+					new SourceElement() {
+						@Override
+						public List<SourceFile> getFiles() {
+							return Arrays.asList(
+								sourceFile("a.cpp", "void a() {}"),
+								sourceFile("b.cpp", "void b() {}"),
+								sourceFile("c.cpp", "void c() {}"),
+								sourceFile("d.cpp", "void d() {}"),
+								sourceFile("e.cpp", "void e() {}")
+							);
+						}
+					},
+					new SourceElement() {
+						@Override
+						public List<SourceFile> getFiles() {
+							return Arrays.asList(
+								sourceFile("a.cpp", "void a() {}"), // preseved
+								sourceFile("renamed-b.cpp", "void b() {}"), //renamed
+								// c.cpp is removed
+								sourceFile("dir/d.cpp", "void d() {}"), // moved
+								sourceFile("e.cpp", "int e() { return 42; }") // modified
+							);
+						}
+					}
+				));
 			}
-		);
+		};
 
 		@Test
 		void canWriteAsSourceElement(@TempDir Path testDirectory) {

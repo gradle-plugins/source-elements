@@ -92,11 +92,6 @@ public final class SourceFile {
 		}
 	}
 
-	// Essentially deprecated
-	public void writeToFile(File file) {
-		writeToFile(file.toPath());
-	}
-
 	public SourceFile withPath(UnaryOperator<Path> transformer) {
 		Path newPath = transformer.apply(Paths.get(path).resolve(name));
 		return new SourceFile(newPath.getParent().toString(), newPath.getFileName().toString(), content);

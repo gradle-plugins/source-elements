@@ -3,7 +3,7 @@ package dev.nokee.elements.core;
 import java.util.Arrays;
 
 /**
- * Represents an logical source element.
+ * Represents an logical element.
  */
 public abstract class Element {
 	/**
@@ -33,6 +33,13 @@ public abstract class Element {
 		return SourceFile.of(sourcePath, content);
 	}
 
+	/**
+	 * Creates a source file represented by the specified source path and content lines.
+	 *
+	 * @param sourcePath  the file path (relative to the source set directory)
+	 * @param lines  the lines making the file content
+	 * @return a new source file
+	 */
 	protected static SourceFile sourceFile(String sourcePath, String... lines) {
 		return SourceFile.of(sourcePath, String.join("\n", lines));
 	}

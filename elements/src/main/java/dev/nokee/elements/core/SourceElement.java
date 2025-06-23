@@ -12,6 +12,8 @@ import java.util.stream.Stream;
 // TODO: Maybe this should extends from FileSystemElement
 //   this could means we could do IncrementalElement.apply(allChanges()).writeToDirectory(...)
 //   IncrementalElement should probably have a shortcut IncrementalElement.applyAllChanges()
+// TODO: We should probably rename this to SourceSetElement and use SourceElement as the general interface representing source
+//   We need to prevent nesting project element AKA project element should contains only SourceElement (the general concept of a source element)
 public abstract class SourceElement extends Element implements WritableElement {
 	/**
 	 * {@return the source files associated with this element, possibly none.}

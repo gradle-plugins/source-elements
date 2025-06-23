@@ -3,6 +3,9 @@ package dev.nokee.elements.core;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Represents an element containing zero or more project.
+ */
 public abstract class WorkspaceElement extends Element {
 	private final Object identifier;
 
