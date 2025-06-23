@@ -33,7 +33,7 @@ public class FileSystemElement extends Element implements WritableElement {
 
 		public Node writeToDirectory(Path directory) {
 			for (SourceFile file : sources.getFiles()) {
-				file.writeToDirectory(directory.resolve(location));
+				file.writeToDirectory(directory.resolve(location.toString()));
 			}
 			return new Node(directory, location, sources);
 		}
