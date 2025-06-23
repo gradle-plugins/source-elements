@@ -153,7 +153,7 @@ class IncrementalElementTests {
 
 	@Nested
 	class RelocateCppSourceTest {
-		ProjectElement project = ProjectElement.ofMain(new NativeSourceElement() {
+		ProjectElement subject = ProjectElement.ofMain(new NativeSourceElement() {
 			@Override
 			public SourceElement getSources() {
 				return SourceElement.ofElements(ofFiles(
@@ -170,7 +170,21 @@ class IncrementalElementTests {
 
 		@Test
 		void applyTransform(@TempDir Path testDirectory) {
-			new GradleLayoutElement().applyTo(project).writeToDirectory(testDirectory).apply(allChanges());
+			FileSystemElement element = new GradleLayoutElement().applyTo(subject).writeToDirectory(testDirectory);
+
+			assertThat(testDirectory, hasRelativeDescendants(
+				"src/main/cpp/main.cpp",
+				"src/main/cpp/foo.h",
+				"src/main/cpp/app.cpp"
+			));
+
+			element.apply(allChanges());
+
+			assertThat(testDirectory, hasRelativeDescendants(
+				"src/main/cpp/main.cpp",
+				"src/main/cpp/foo.h",
+				"src/main/cpp/dir/app.cpp"
+			));
 		}
 	}
 }

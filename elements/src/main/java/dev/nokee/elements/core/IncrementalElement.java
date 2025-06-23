@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +36,38 @@ public abstract class IncrementalElement extends SourceElement {
 		List<SourceFile> getBeforeFiles();
 
 		List<SourceFile> getAfterFiles();
+	}
+
+	public static IncrementalElement transform(SourceElement beforeElement, SourceElement afterElement) {
+		return new IncrementalElement() {
+			@Override
+			protected List<Transform> getIncrementalChanges() {
+				return Collections.singletonList(new Transform() {
+					@Override
+					public void applyChangesTo(Path directory) {
+						try {
+							for (SourceFile beforeFile : getBeforeFiles()) {
+								Files.delete(directory.resolve(beforeFile.getPath()).resolve(beforeFile.getName()));
+							}
+
+							afterElement.writeToDirectory(directory);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+
+					@Override
+					public List<SourceFile> getBeforeFiles() {
+						return beforeElement.getFiles();
+					}
+
+					@Override
+					public List<SourceFile> getAfterFiles() {
+						return afterElement.getFiles();
+					}
+				});
+			}
+		};
 	}
 
 	/**
@@ -160,7 +193,33 @@ public abstract class IncrementalElement extends SourceElement {
 	}
 
 	protected static Transform move(SourceElement beforeElement, String destinationPath) {
-		throw new UnsupportedOperationException();
+		return new Transform() {
+			@Override
+			public void applyChangesTo(Path directory) {
+				try {
+					Path destPath = Files.createDirectories(directory.resolve(destinationPath));
+					for (SourceFile file : beforeElement.getFiles()) {
+						assert !file.getPath().equals(destinationPath);
+						Path src = directory.resolve(file.getPath()).resolve(file.getName());
+						Path dst = destPath.resolve(file.getName());
+
+						Files.move(src, dst);
+					}
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			}
+
+			@Override
+			public List<SourceFile> getBeforeFiles() {
+				return beforeElement.getFiles();
+			}
+
+			@Override
+			public List<SourceFile> getAfterFiles() {
+				return beforeElement.getFiles().stream().map(it -> it.withPath(path -> Paths.get(destinationPath).resolve(path.getFileName()))).collect(Collectors.toList());
+			}
+		};
 	}
 
 	/**
