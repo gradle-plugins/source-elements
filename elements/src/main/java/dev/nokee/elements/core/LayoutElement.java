@@ -13,12 +13,7 @@ public abstract class LayoutElement {
 			public FileSystemElement writeToDirectory(Path directory) {
 				Context context = new Context();
 				context.visit(element);
-				for (SourceFile file : context.allFiles) {
-					file.writeToDirectory(directory);
-				}
-				return new FileSystemElement() {
-					// FIXME: Implements
-				};
+				return new FileSystemElement(Paths.get(""), context.allFiles).writeToDirectory(directory);
 			}
 		};
 	}

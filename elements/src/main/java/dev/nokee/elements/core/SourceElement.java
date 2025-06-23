@@ -1,6 +1,7 @@
 package dev.nokee.elements.core;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,13 +21,8 @@ public abstract class SourceElement extends Element implements WritableElement {
 	/**
 	 * {@inheritDoc}
 	 */
-	public FileSystemElement writeToDirectory(Path directory) {
-		for (SourceFile sourceFile : getFiles()) {
-			sourceFile.writeToDirectory(directory);
-		}
-		return new FileSystemElement() {
-			// FIXME: implements
-		};
+	public final FileSystemElement writeToDirectory(Path directory) {
+		return new FileSystemElement(Paths.get(""), getFiles()).writeToDirectory(directory);
 	}
 
 	/**
