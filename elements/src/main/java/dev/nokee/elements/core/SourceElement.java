@@ -20,10 +20,13 @@ public abstract class SourceElement extends Element implements WritableElement {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void writeToDirectory(Path directory) {
+	public FileSystemElement writeToDirectory(Path directory) {
 		for (SourceFile sourceFile : getFiles()) {
 			sourceFile.writeToDirectory(directory);
 		}
+		return new FileSystemElement() {
+			// FIXME: implements
+		};
 	}
 
 	/**

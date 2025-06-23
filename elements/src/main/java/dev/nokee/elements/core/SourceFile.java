@@ -94,7 +94,7 @@ public final class SourceFile {
 	}
 
 	public SourceFile withPath(UnaryOperator<Path> transformer) {
-		Path newPath = transformer.apply(Paths.get(path + "/" + name));
+		Path newPath = transformer.apply(Paths.get(path).resolve(name));
 		return new SourceFile(newPath.getParent().toString(), newPath.getFileName().toString(), content);
 	}
 

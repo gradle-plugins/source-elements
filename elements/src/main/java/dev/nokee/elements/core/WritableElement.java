@@ -11,5 +11,5 @@ public interface WritableElement {
 	 *
 	 * @param directory  the directory to write this element
 	 */
-	void writeToDirectory(Path directory);
+	FileSystemElement writeToDirectory(Path directory);
 }

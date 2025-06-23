@@ -156,7 +156,7 @@ class LayoutTests {
 		protected void visitWorkspace(WorkspaceElement element, Context context) {
 			for (ProjectElement project : element.getProjects()) {
 				includeCtx = context.dir("includes").dir(projectNameOf(project));
-				visit(project, context.dir("src").dir(projectNameOf(project)));
+				context.dir("src").dir(projectNameOf(project)).visit(project);
 			}
 		}
 
@@ -164,26 +164,26 @@ class LayoutTests {
 
 		@Override
 		protected void visitProject(ProjectElement element, Context context) {
-			visit(element.getMainElement(), context);
-			visit(element.getTestElement(), context.dir("tests"));
+			context.visit(element.getMainElement());
+			context.dir("tests").visit(element.getTestElement());
 		}
 
 		@Override
 		protected void visitNative(NativeElement element, Context context) {
 			if (element instanceof NativeLibraryElement) {
-				visit(((NativeLibraryElement) element).getPublicHeaders(), includeCtx);
-				visit(((NativeLibraryElement) element).getPrivateHeaders(), context);
+				includeCtx.visit(((NativeLibraryElement) element).getPublicHeaders());
+				context.visit(((NativeLibraryElement) element).getPrivateHeaders());
 			} else {
-				visit(element.getHeaders(), context);
+				context.visit(element.getHeaders());
 			}
 
-			visit(element.getSources(), context);
+			context.visit(element.getSources());
 		}
 
 		@Override
 		protected void visitSource(SourceElement element, Context context) {
 			for (SourceFile file : element.getFiles()) {
-				visit(file, context);
+				context.visit(file);
 			}
 		}
 	}
@@ -194,8 +194,8 @@ class LayoutTests {
 		@Override
 		protected void visitWorkspace(WorkspaceElement element, Context context) {
 			for (ProjectElement project : element.getProjects()) {
-				visit(project.getMainElement(), context.dir(projectNameOf(project)));
-				visit(project.getTestElement(), context.dir(projectNameOf(project) + "Test"));
+				context.dir(projectNameOf(project)).visit(project.getMainElement());
+				context.dir(projectNameOf(project) + "Test").visit(project.getTestElement());
 			}
 		}
 
@@ -206,14 +206,14 @@ class LayoutTests {
 
 		@Override
 		protected void visitNative(NativeElement element, Context context) {
-			visit(element.getHeaders(), context);
-			visit(element.getSources(), context);
+			context.visit(element.getHeaders());
+			context.visit(element.getSources());
 		}
 
 		@Override
 		protected void visitSource(SourceElement element, Context context) {
 			for (SourceFile file : element.getFiles()) {
-				visit(file, context);
+				context.visit(file);
 			}
 		}
 	}
