@@ -15,6 +15,14 @@ import java.util.stream.Collectors;
  * Represent a source element with transformation changes.
  * Use {@link IncrementalElement#allChanges()} with {@link FileSystemElement#apply(ChangeVisitor)} to apply all incremental changes.
  */
+// TODO: Allow to write the changes as a patch file
+//  most likely convert the changes to a SourceFile which is a patch file
+//  The idea is:
+//  samples.foo.sources {
+//    def app = new MyApp()
+//    project('.').fromTemplate(app)
+//    project('.').fromTemplate(sourceFile("my-patch.patch", diffTool(inGradleLayout(app), inGradleLayout(app).applyAllChanges())))
+//  }
 public abstract class IncrementalElement extends SourceElement {
 	private final OriginalElement original = new OriginalElement();
 	private final AlternateElement alternate = new AlternateElement();

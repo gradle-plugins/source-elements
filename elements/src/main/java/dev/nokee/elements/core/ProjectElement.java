@@ -3,6 +3,8 @@ package dev.nokee.elements.core;
 import java.util.UUID;
 
 // TODO: Remove extends from Element
+// TODO: Add the concept of additional source sets (as in src/<name> in Gradle layout)
+// TODO: Add the concept of additional source files (as in random source files inside the project)
 public abstract class ProjectElement extends Element {
 	private final Object identifier;
 
