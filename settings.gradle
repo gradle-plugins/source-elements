@@ -1,3 +1,7 @@
+pluginManagement {
+	includeBuild 'gradle/plugins/nokeebuild-plugins'
+}
+
 plugins {
 	id 'dev.gradleplugins.gradle-plugin-development' version '1.7.1'
 }

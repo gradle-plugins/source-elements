@@ -1,6 +1,8 @@
 plugins {
 	id 'java-library'
 	id 'maven-publish'
+	id 'nokeebuild.use-junit-platform-in-test-suites'
+	id 'nokeebuild.use-latest-java-lts-in-test-suites'
 }
 
 description = 'Gradle fixtures'
@@ -15,16 +17,8 @@ repositories {
 testing {
 	suites {
 		test {
-			useJUnitJupiter('5.11.4')
-
-			targets.configureEach {
-				testTask.configure {
-					systemProperty 'junit.jupiter.tempdir.cleanup.mode.default', 'ON_SUCCESS'
-				}
-			}
-
 			dependencies {
-				implementation 'dev.nokee.commons:commons-hamcrest'
+				implementation 'dev.nokee.commons:nokee-hamcrest'
 			}
 		}
 	}

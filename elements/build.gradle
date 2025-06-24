@@ -1,6 +1,8 @@
 plugins {
 	id 'java-library'
 	id 'jvm-test-suite'
+	id 'nokeebuild.use-junit-platform-in-test-suites'
+	id 'nokeebuild.use-latest-java-lts-in-test-suites'
 }
 
 group = 'dev.gradleplugins'
@@ -9,16 +11,8 @@ version = '2.0-milestone-1'
 testing {
 	suites {
 		test {
-			useJUnitJupiter('5.11.4')
-
-			targets.configureEach {
-				testTask.configure {
-					systemProperty 'junit.jupiter.tempdir.cleanup.mode.default', 'ON_SUCCESS'
-				}
-			}
-
 			dependencies {
-				implementation 'dev.nokee.commons:commons-hamcrest'
+				implementation 'dev.nokee.commons:nokee-hamcrest'
 				implementation 'org.apache.commons:commons-lang3:3.17.0'
 			}
 		}
