@@ -30,3 +30,10 @@ gradle.allprojects {
 gradle.rootProject {
 	tasks.register('check') { dependsOn(subprojects.collect { "${it.name}:check" }) }
 }
+
+sourceControl {
+	gitRepository(uri("https://github.com/nokeedev/nokee-hamcrest"))
+	gitRepository(uri("https://github.com/gradle-plugins/gradle-build-script")) {
+		producesModule('dev.gradleplugins:gradle-build-script')
+	}
+}
