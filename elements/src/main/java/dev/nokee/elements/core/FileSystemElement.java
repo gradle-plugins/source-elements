@@ -14,7 +14,7 @@ public class FileSystemElement extends Element implements WritableElement {
 	private final List<Node> nodes;
 
 	public FileSystemElement(Path location, SourceElement sources) {
-		this(Paths.get(""), Collections.singletonList(new Node(location, sources)));
+		this(location, Collections.singletonList(new Node(Paths.get(""), sources)));
 	}
 
 	FileSystemElement(Path base, List<Node> nodes) {
@@ -31,11 +31,8 @@ public class FileSystemElement extends Element implements WritableElement {
 			this.sources = sources;
 		}
 
-		public Node writeToDirectory(Path directory) {
-			for (SourceFile file : sources.getFiles()) {
-				file.writeToDirectory(directory.resolve(location.toString()));
-			}
-			return new Node(location, sources);
+		public void writeToDirectory(Path directory) {
+			sources.writeToDirectory(directory.resolve(location.toString()));
 		}
 	}
 
@@ -44,7 +41,8 @@ public class FileSystemElement extends Element implements WritableElement {
 	 */
 	@Override
 	public FileSystemElement writeToDirectory(Path directory) {
-		return new FileSystemElement(directory, nodes.stream().map(it -> it.writeToDirectory(directory)).collect(Collectors.toList()));
+		nodes.forEach(it -> it.writeToDirectory(directory));
+		return new FileSystemElement(directory, nodes);
 	}
 
 	public FileSystemElement apply(IncrementalElement.ChangeVisitor transform) {

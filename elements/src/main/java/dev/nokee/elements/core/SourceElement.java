@@ -1,10 +1,8 @@
 package dev.nokee.elements.core;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Represent an element containing zero or more source files.
@@ -24,7 +22,8 @@ public abstract class SourceElement extends Element implements WritableElement {
 	 * {@inheritDoc}
 	 */
 	public final FileSystemElement writeToDirectory(Path directory) {
-		return new FileSystemElement(Paths.get(""), this).writeToDirectory(directory);
+		getFiles().forEach(it -> it.writeToDirectory(directory));
+		return new FileSystemElement(directory, this);
 	}
 
 	/**
