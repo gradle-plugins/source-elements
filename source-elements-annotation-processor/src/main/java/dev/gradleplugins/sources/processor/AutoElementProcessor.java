@@ -151,7 +151,7 @@ public class AutoElementProcessor extends AbstractProcessor {
 	private String toCode(SourceFile file) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\t\t\tnew SourceFile(\"" + file.getPath() + "\", \"" + file.getName() + "\", ");
-		builder.append(file.getContent().lines().map(it -> it.replace("\"", "\\\"")).map(it -> it + "\\n").map(it -> "\"" + it + "\"").collect(Collectors.joining("\n\t\t\t\t+ ")));
+		builder.append(file.getContent().lines().map(it -> it.replace("\"", "\\\"").replace("\\n", "\\\\n")).map(it -> it + "\\n").map(it -> "\"" + it + "\"").collect(Collectors.joining("\n\t\t\t\t+ ")));
 		builder.append("\n\t\t\t)");
 		return builder.toString();
 	}
