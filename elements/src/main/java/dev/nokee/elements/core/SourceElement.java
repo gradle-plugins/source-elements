@@ -1,6 +1,11 @@
 package dev.nokee.elements.core;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,6 +29,25 @@ public abstract class SourceElement extends Element implements WritableElement {
 	public final FileSystemElement writeToDirectory(Path directory) {
 		getFiles().forEach(it -> it.writeToDirectory(directory));
 		return new FileSystemElement(directory, this);
+	}
+
+	public final Object asZip(String path) {
+		return new Object() {
+			public void writeToDirectory(Path directory) throws IOException {
+				URI uri = URI.create("jar:file:" + directory.resolve(path));
+				try (FileSystem zipfs = FileSystems.newFileSystem(uri, Collections.singletonMap("create", "true"))) {
+					SourceElement.this.writeToDirectory(zipfs.getPath("/"));
+					Files.walkFileTree(zipfs.getPath("/"), new SimpleFileVisitor<Path>() {
+						@Override
+						public FileVisitResult visitFile(Path sourcePath, BasicFileAttributes attrs) throws IOException {
+							BasicFileAttributeView view = Files.getFileAttributeView(sourcePath, BasicFileAttributeView.class);
+							view.setTimes(FileTime.fromMillis(0), FileTime.fromMillis(0), FileTime.fromMillis(0));
+							return FileVisitResult.CONTINUE;
+						}
+					});
+				}
+			}
+		};
 	}
 
 	/**
