@@ -10,23 +10,23 @@ import java.util.stream.Collectors;
  * Represent source elements mapped to file system locations.
  */
 public class FileSystemElement extends Element implements WritableElement {
+	private final Path base;
 	private final List<Node> nodes;
 
 	public FileSystemElement(Path location, SourceElement sources) {
-		this(Collections.singletonList(new Node(Paths.get(""), location, sources)));
+		this(Paths.get(""), Collections.singletonList(new Node(location, sources)));
 	}
 
-	FileSystemElement(List<Node> nodes) {
+	FileSystemElement(Path base, List<Node> nodes) {
+		this.base = base;
 		this.nodes = nodes;
 	}
 
 	static final class Node {
-		private final Path base;
 		private final Path location;
 		private final SourceElement sources;
 
-		public Node(Path base, Path location, SourceElement sources) {
-			this.base = base;
+		public Node(Path location, SourceElement sources) {
 			this.location = location;
 			this.sources = sources;
 		}
@@ -35,7 +35,7 @@ public class FileSystemElement extends Element implements WritableElement {
 			for (SourceFile file : sources.getFiles()) {
 				file.writeToDirectory(directory.resolve(location.toString()));
 			}
-			return new Node(directory, location, sources);
+			return new Node(location, sources);
 		}
 	}
 
@@ -44,11 +44,11 @@ public class FileSystemElement extends Element implements WritableElement {
 	 */
 	@Override
 	public FileSystemElement writeToDirectory(Path directory) {
-		return new FileSystemElement(nodes.stream().map(it -> it.writeToDirectory(directory)).collect(Collectors.toList()));
+		return new FileSystemElement(directory, nodes.stream().map(it -> it.writeToDirectory(directory)).collect(Collectors.toList()));
 	}
 
 	public FileSystemElement apply(IncrementalElement.ChangeVisitor transform) {
-		return new FileSystemElement(nodes.stream().map(it -> new Node(it.base, it.location, transform.visit(it.base.resolve(it.location), it.sources))).collect(Collectors.toList()));
+		return new FileSystemElement(base, nodes.stream().map(it -> new Node(it.location, transform.visit(base.resolve(it.location), it.sources))).collect(Collectors.toList()));
 	}
 
 	@Override

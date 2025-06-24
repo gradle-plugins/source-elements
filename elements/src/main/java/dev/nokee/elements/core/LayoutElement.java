@@ -16,7 +16,7 @@ public abstract class LayoutElement {
 	public FileSystemElement applyTo(Element element) {
 		Context context = new Context();
 		context.visit(element);
-		return new FileSystemElement(context.allFiles);
+		return new FileSystemElement(Paths.get(""), context.allFiles);
 	}
 
 	protected abstract void visit(Element element, Context context);
@@ -43,7 +43,7 @@ public abstract class LayoutElement {
 		}
 
 		public void visitSources(SourceElement sourceElement) {
-			allFiles.add(new FileSystemElement.Node(Paths.get(""), location, sourceElement));
+			allFiles.add(new FileSystemElement.Node(location, sourceElement));
 		}
 	}
 }
