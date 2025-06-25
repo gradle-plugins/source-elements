@@ -4,6 +4,7 @@ pluginManagement {
 
 plugins {
 	id 'dev.gradleplugins.gradle-plugin-development' version '1.7.1'
+	id 'nokeebuild.source-control-management'
 }
 
 include 'elements'
@@ -31,9 +32,7 @@ gradle.rootProject {
 	tasks.register('check') { dependsOn(subprojects.collect { "${it.name}:check" }) }
 }
 
-sourceControl {
-	gitRepository(uri("https://github.com/nokeedev/nokee-hamcrest"))
-	gitRepository(uri("https://github.com/gradle-plugins/gradle-build-script")) {
-		producesModule('dev.gradleplugins:gradle-build-script')
-	}
+sourceControlManagement {
+	gitRepository(uri("https://github.com/nokeedev/nokee-hamcrest.git")) { submodule = true }
+	gitRepository(uri("https://github.com/gradle-plugins/gradle-build-script.git"))
 }
