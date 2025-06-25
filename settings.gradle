@@ -1,5 +1,5 @@
 pluginManagement {
-	includeBuild 'gradle/plugins/nokeebuild-plugins'
+	apply from: 'https://raw.githubusercontent.com/nokeedev/nokeebuild-plugins/refs/heads/main/init.gradle'
 }
 
 plugins {
