@@ -1,3 +1,0 @@
-[submodule "gradle/plugins/nokeebuild-plugins"]
-	path = gradle/plugins/nokeebuild-plugins
-	url = git@github.com:nokeedev/nokeebuild-plugins.git
