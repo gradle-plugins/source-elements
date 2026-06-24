@@ -60,6 +60,10 @@ public final class SourceFile {
 		return path;
 	}
 
+	public String getFilePath() {
+		return path.isEmpty() ? name : path + "/" + name;
+	}
+
 	public String getName() {
 		return name;
 	}
