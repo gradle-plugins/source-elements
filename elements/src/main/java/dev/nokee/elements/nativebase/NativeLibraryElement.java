@@ -50,6 +50,20 @@ public abstract class NativeLibraryElement extends NativeElement {
 			}
 		};
 	}
+
+	public static NativeLibraryElement ofPublicHeaders(SourceElement publicHeaders) {
+		return new NativeLibraryElement() {
+			@Override
+			public SourceElement getSources() {
+				return SourceElement.empty();
+			}
+
+			@Override
+			public SourceElement getPublicHeaders() {
+				return publicHeaders;
+			}
+		};
+	}
 	//endregion
 
 	//region private headers
